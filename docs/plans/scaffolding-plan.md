@@ -1,6 +1,6 @@
 # Trailhead — Scaffolding Plan
 
-**Status:** Approved 2026-07-07 (C1/C5 resolved by Cat same day) — Milestone 0 in progress
+**Status:** Approved 2026-07-07 (C1/C5 resolved by Cat same day) — M0 complete; M1 code-complete (see `docs/content-review/m1-for-cat.md` for the content approvals that remain)
 **Author:** Claude Code session, 2026-07-07
 **Scope:** Repo scaffold → live Phase-1 deployment (Green + Yellow end-to-end) → Blue/Red scaffolds behind flags
 **Canonical sources:** `CLAUDE.md`, `docs/Trailhead_PRD`, `docs/Trailhead_Product_Brief`, the four path docs, `reusable-tools-masterlist`, `onboarding` (Big Five quiz), Cat's Blueprint Q&A
