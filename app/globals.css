@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens land in the design-tokens commit (Patagonia palette as
+ * CSS variables — see docs/plans/scaffolding-plan.md §M0). Components must
+ * never hardcode hex values; scripts/check-tokens.mjs enforces this in CI.
+ */
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+}
