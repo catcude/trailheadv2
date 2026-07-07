@@ -1,6 +1,6 @@
 # Trailhead — Scaffolding Plan
 
-**Status:** Draft for review — do not implement until approved
+**Status:** Approved 2026-07-07 (C1/C5 resolved by Cat same day) — Milestone 0 in progress
 **Author:** Claude Code session, 2026-07-07
 **Scope:** Repo scaffold → live Phase-1 deployment (Green + Yellow end-to-end) → Blue/Red scaffolds behind flags
 **Canonical sources:** `CLAUDE.md`, `docs/Trailhead_PRD`, `docs/Trailhead_Product_Brief`, the four path docs, `reusable-tools-masterlist`, `onboarding` (Big Five quiz), Cat's Blueprint Q&A
@@ -13,11 +13,11 @@ Per CLAUDE.md's own rule ("when this file and the PRD conflict, flag it, don't g
 
 | # | Conflict | Where | Recommended resolution (needs confirmation) |
 |---|---|---|---|
-| C1 | Red Path spec status: CLAUDE.md says "spec incomplete — do not build without Cat's source doc and safety review"; PRD says "Red spec is now complete; ship only after dedicated safety review" | CLAUDE.md §Source Documents vs PRD §11 | PRD is newer and a full Red doc exists in the repo. **Scaffold Red behind a hard feature flag; safety review is the release gate.** Update CLAUDE.md after Cat confirms. |
+| C1 | Red Path spec status: CLAUDE.md says "spec incomplete — do not build without Cat's source doc and safety review"; PRD says "Red spec is now complete; ship only after dedicated safety review" | CLAUDE.md §Source Documents vs PRD §11 | **RESOLVED (Cat, 2026-07-07):** follow the PRD and `redpath.txt` — the spec is complete; the repeated content in the file is text duplication only. Red scaffolds behind a hard feature flag; safety review remains the release gate. CLAUDE.md updated accordingly. |
 | C2 | Palette: CLAUDE.md Design Principles say "warm neutrals + trail-green accent"; PRD §5.1 confirms the Patagonia palette (coral/orange primary) and explicitly marks the earthier palette as rejected | CLAUDE.md §Design Principles vs PRD §5.1 | **Use the Patagonia palette** (PRD is explicit that it's confirmed). Propose a CLAUDE.md correction PR. |
 | C3 | Repo layout: CLAUDE.md references `/docs/paths/*.md`, `/docs/tools/reusable-tools.md`, `brand-voice-report.md` — none exist. Actual content lives as `.txt` files at repo root (`greenpath.txt`, etc.) | Repo state | **Normalize in M0**: move source docs verbatim into `docs/paths/`, `docs/tools/` (a `content:` commit, byte-identical text). Flag that `brand-voice-report.md` does not exist — the Q&A + CLAUDE.md voice sections stand in for it. |
 | C4 | `chatbot.txt` recommends Rasa/BotPress/Dialogflow and open-ended NLP chat | chatbot.txt vs CLAUDE.md/PRD hybrid model | **Treat as historical research, superseded.** The confirmed architecture is the deterministic state machine + authored content + LLM adaptation layer. No chatbot platform. |
-| C5 | Red Path doc internal inconsistencies: (a) two different Stage 6 quote sets (one shared with Green, one "Updated for Emotional Resilience"); (b) the cheat sheet includes Green's "processing changes" Stage 5 special case | redpath doc | Scaffold both quote banks as versioned content, **ask Cat which is canonical** before Red ever unflags. Storyboard slides 9–10 suggest the processing-changes case *is* intended in Red — confirm. |
+| C5 | Red Path doc internal inconsistencies: (a) two different Stage 6 quote sets (one shared with Green, one "Updated for Emotional Resilience"); (b) the cheat sheet includes Green's "processing changes" Stage 5 special case | redpath doc | **RESOLVED-BY-DEFAULT (per Cat's 2026-07-07 direction that the file's repetition is text duplication):** (a) the set explicitly labeled "Updated for Emotional Resilience" is canonical for Red Stage 6 — it matches storyboard slide 11; (b) the processing-changes case *is* in Red Stage 5, per storyboard slides 9–10. Both quote banks still ship as versioned content; Cat can override at Red's content review before unflagging. |
 | C6 | FlutterFlow storyboards | PRD §11 | Already resolved by PRD: **design references only**; stack is Next.js App Router + Tailwind + Supabase + Stripe on Vercel. |
 
 ---
@@ -276,7 +276,7 @@ Two projects: **staging** (serves all previews) and **prod**. Flow: local `supab
 - **G-R1** — Stage 2 canonical weight options (storyboard's six quick-taps vs open prompt).
 - **G-R2** — Ask-for-help scripts — named, not authored.
 - **G-R3** — "Is this deadline actually real?" dialogue — not authored.
-- **G-R4** — Canonical Stage 6 quote set (see C5a) and whether processing-changes belongs in Red Stage 5 (C5b).
+- **G-R4** — ~~Canonical Stage 6 quote set (see C5a) and whether processing-changes belongs in Red Stage 5 (C5b)~~ — resolved with C5 (2026-07-07): "Updated for Emotional Resilience" set is canonical; processing-changes is in Red Stage 5.
 - **G-R5** — Red-specific escalation thresholds (when Red hands to the safety layer) — safety-review scope.
 
 ---
