@@ -66,11 +66,33 @@ export const FallbacksSchema = z.object({
   stillStuck: z.string().min(1).optional(),
 });
 
+/**
+ * Tip-box slot. When the authored body is a known gap (e.g. G-G1), the slot
+ * ships with `gapRef` and no body — the UI hides empty tips until Cat's copy
+ * lands.
+ */
+export const TipSchema = z.object({
+  title: z.string().min(1).optional(),
+  body: z.string().min(1).optional(),
+  sourceRef: z.string().min(1),
+  gapRef: z.string().min(1).optional(),
+  needsCat: z.boolean().optional(),
+});
+export type Tip = z.infer<typeof TipSchema>;
+
+/** Target sentinel: return to the node that triggered a fallback detour. */
+export const RETURN_TARGET = "@return";
+
 const NodeBase = z.object({
   id: z.string().min(1),
   stage: StageSchema,
   tone: ToneTagSchema,
   juniper: JuniperTextSchema.optional(),
+  /** Juniper's acknowledgment spoken AFTER the user's input on this node. */
+  response: JuniperTextSchema.optional(),
+  tip: TipSchema.optional(),
+  /** Node only appears in one check-in variant (e.g. evening wind-down). */
+  variantOnly: z.enum(["standard", "evening"]).optional(),
   fallbacks: FallbacksSchema.optional(),
 });
 
@@ -173,6 +195,7 @@ export function validatePathContent(
 
   for (const node of Object.values(nodes)) {
     for (const target of edgeTargets(node)) {
+      if (target === RETURN_TARGET) continue;
       if (!nodes[target] && !externalTargets.has(target)) {
         issues.push({
           nodeId: node.id,
