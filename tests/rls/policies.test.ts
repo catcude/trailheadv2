@@ -219,6 +219,28 @@ suite("row level security (owner-only, no exceptions)", () => {
     });
     expect(error).not.toBeNull();
   });
+
+  // ── billing: owner may read, clients may never write (webhook-only) ────────
+  it("billing_customers has no client insert policy", async () => {
+    const { error } = await alice
+      .from("billing_customers")
+      .insert({ user_id: aliceId, stripe_customer_id: "cus_forged" });
+    expect(error).not.toBeNull();
+  });
+
+  it("subscriptions has no client insert policy", async () => {
+    const { error } = await alice.from("subscriptions").insert({
+      user_id: aliceId,
+      stripe_subscription_id: "sub_forged",
+      status: "active",
+    });
+    expect(error).not.toBeNull();
+  });
+
+  it("another user cannot read billing rows", async () => {
+    const { data } = await bob.from("subscriptions").select("*");
+    expect(data ?? []).toEqual([]);
+  });
 });
 
 if (!configured) {

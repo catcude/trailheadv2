@@ -26,6 +26,14 @@ import { adaptMessage } from "@/lib/llm/adapt";
 import { interpretBrainDump } from "@/lib/llm/interpret";
 import { explainPlanChange } from "@/lib/llm/plan-change";
 import { recalibratedTone } from "@/content/tone/tones";
+import { canStartCheckin } from "@/lib/billing/entitlement";
+
+/**
+ * Free-tier paywall copy (D2). Kind, honest, no dark pattern — names the free
+ * Mini Resets. Draft (needsCat): exact wording pending Cat.
+ */
+const PAYWALL_COPY =
+  "You’ve used today’s check-in. Come back tomorrow whenever you’re ready — or unlock unlimited check-ins any time. Mini Resets are always free.";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 import { createFixedWindowLimiter } from "@/lib/utils/rate-limit";
@@ -114,6 +122,15 @@ export async function POST(request: NextRequest) {
       const pathContent = paths[path];
       if (!pathContent) {
         return NextResponse.json({ error: "invalid request" }, { status: 400 });
+      }
+      // Freemium gate (WS7): a full check-in = a NEW session. Mini Resets run
+      // inside an existing session, so they're never gated here. Subscribers
+      // are unlimited; free users get FREE_DAILY_CHECKINS/day.
+      if (!(await canStartCheckin(supabase, user.id))) {
+        return NextResponse.json(
+          { error: PAYWALL_COPY, paywall: true },
+          { status: 402 },
+        );
       }
       content = pathContent;
       const ctx: EngineContext = { content, quoteBanks };
