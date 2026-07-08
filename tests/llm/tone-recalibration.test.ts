@@ -5,7 +5,10 @@ import { tones } from "@/content/tone/tones";
 describe("Stage-5 tone recalibration (PRD §3.3)", () => {
   it("maps every Stage-5 option id to a known tone", () => {
     for (const tag of Object.values(stage5ToneByChoice)) {
-      expect(tones[tag], `tone "${tag}" must exist in the registry`).toBeDefined();
+      expect(
+        tones[tag],
+        `tone "${tag}" must exist in the registry`,
+      ).toBeDefined();
     }
   });
 

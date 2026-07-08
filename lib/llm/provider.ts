@@ -56,8 +56,8 @@ function splitMessages(messages: Message[]): {
     .map((m) => m.content)
     .join("\n\n");
   const turns = messages
-    .filter((m): m is Message & { role: "user" | "assistant" } =>
-      m.role !== "system",
+    .filter(
+      (m): m is Message & { role: "user" | "assistant" } => m.role !== "system",
     )
     .map((m) => ({ role: m.role, content: m.content }));
   return { system, turns };

@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { buildPlanChangePrompt, explainPlanChange } from "@/lib/llm/plan-change";
+import {
+  buildPlanChangePrompt,
+  explainPlanChange,
+} from "@/lib/llm/plan-change";
 import { LLMProviderError, verbatimProvider } from "@/lib/llm/provider";
 import type { LLMProvider } from "@/lib/llm/types";
 

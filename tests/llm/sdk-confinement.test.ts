@@ -10,13 +10,7 @@ import { describe, expect, it } from "vitest";
  */
 const ROOT = join(import.meta.dirname, "..", "..");
 const ALLOWED_PREFIX = join("lib", "llm");
-const SKIP = new Set([
-  "node_modules",
-  ".next",
-  ".git",
-  "dist",
-  "coverage",
-]);
+const SKIP = new Set(["node_modules", ".next", ".git", "dist", "coverage"]);
 
 function walk(dir: string, acc: string[] = []): string[] {
   for (const entry of readdirSync(dir)) {
@@ -38,8 +32,9 @@ describe("Anthropic SDK confinement", () => {
       const src = readFileSync(file, "utf8");
       if (src.includes("@anthropic-ai/sdk")) offenders.push(rel);
     }
-    expect(offenders, `SDK imported outside lib/llm/: ${offenders.join(", ")}`).toEqual(
-      [],
-    );
+    expect(
+      offenders,
+      `SDK imported outside lib/llm/: ${offenders.join(", ")}`,
+    ).toEqual([]);
   });
 });

@@ -75,6 +75,40 @@ jobs:
           export SUPABASE_TEST_SERVICE_ROLE_KEY="$SERVICE_ROLE_KEY"
           pnpm vitest run tests/rls
 
+  tone-judge:
+    # PRD §8 LLM tone judge — REPORT-ONLY (non-blocking). The deterministic
+    # voice-lint runs inside the blocking `checks` job (pnpm test); this job
+    # adds the subjective LLM judge. It self-skips when LLM_API_KEY is absent,
+    # so forks and secret-less runs pass trivially.
+    #
+    # Path filter: only meaningful when the prompt layer or tone data changes.
+    # Promotion to blocking: once this has run green across ≥20 consecutive
+    # main builds with no prompt-driven false negatives, move the step into
+    # the `checks` job and drop continue-on-error.
+    name: Tone judge (report)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run tone judge (skips without a key)
+        env:
+          LLM_PROVIDER: anthropic
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+        run: pnpm vitest run tests/evals/tone-judge.test.ts
+
   audit:
     name: Dependency audit (report)
     runs-on: ubuntu-latest
