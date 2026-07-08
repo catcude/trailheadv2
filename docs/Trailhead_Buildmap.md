@@ -24,6 +24,34 @@
 
 ---
 
+## Decisions from Cat — 2026-07-08
+
+Cat answered the open-questions page (`questions-for-cat.html`); her verbatim answers are checked in at `docs/content-review/cat-answers-2026-07-08.md`. This is the authoritative resolution log; milestones below reference these by ID (D1–D13). Where an answer was ambiguous or only partial, that is stated — **not** filled in by guessing.
+
+- **D1 — AI provider + source-material knowledge base (was OQ1).** Cat did **not** name an LLM provider — our Anthropic/Claude recommendation stands only as a *proposal*, still open. New direction she gave: begin with the dialogue tree + her verbatim words (as built), then **build a Supabase database from her source material that the AI draws on to answer and guide the user**, because "the dialogue tree as it is, is not complex enough." **FLAG (architecture):** this evolves Guidepost beyond today's "LLM only rephrases authored text / never invents flow" toward retrieval-grounded answering from a curated source-material store. That is a genuine shift and needs its own design pass that preserves the non-negotiables — safety screen first, the state machine still owns flow, no fabricated dialogue, and IP integrity of authored content. **Still open:** provider name; the "API for the source material"; how retrieval reconciles with the deterministic/verbatim model. Tracked as new workstream **M2-WS9 (design-only)** below.
+- **D2 — Pricing (was OQ6). RESOLVED (placeholder accepted):** free = 1 full check-in/day + unlimited Mini Resets; paid = unlimited check-ins + full dashboard + community + history. Price **TBD** (Cat sets later).
+- **D3 — Crisis copy.** Confirmed intent: the trusted-adult step must **equip the user with scripts, tools, and guidance** to actually approach a trusted adult — not merely name one. **Still open / needs sign-off:** the exact wording of the intro and trusted-adult lines. Part of Cat's recorded answer was a voice-transcription garble ("Safe email to your farm… regal breakfast") — deliberately **not** interpreted here; re-ask for the exact lines. Boundary line + 988 + Crisis Text Line remain locked/verbatim.
+- **D4 — Reflective-depth cap. RESOLVED:** cap = **3** probing questions, then a grounding reset. New requirement from Cat: the reset must be **non-dismissive and not abrupt** — no jarring tone shift. More layers to this part come later.
+- **D5 — Red Path reframing + escalation basis.** Cat's key clarification: being on the Red Path does **not** by itself mean imminent danger — it means the user is **dysregulated and needs a nervous-system reset**. Users move between paths day-to-day; it is **not** a positive/negative build-up (someone can start Green and end Red, or vice-versa, depending on the day). The line between normal human dysregulation and "needs a medical professional" is defined by the **intensity, frequency, and duration** of Red-Path usage over time. The safety review should focus on defining that threshold. **Still open:** who runs the review + timing. **Privacy note (flagged):** any frequency/duration signal must be computed from the user's **own** owner-only session history and surfaced **only to them** — never to parents/teachers, never in identifiable safety telemetry (this is ordinary owner-only `chat_sessions` data, distinct from the identifier-free `safety_events` crisis log).
+- **D6 — Entry router is 4-way; Yellow label rewritten. RESOLVED:** the opening question routes to **all four paths** by the user's state (not just Green/Yellow with Blue/Red hidden); the AI then responds to move the user toward regulation or to leverage the regulated state they're already in. Yellow entry label, in Cat's words: **"I know what I need to do or want to do, but I'm not sure how to start."** Green label left as drafted. Blue/Red remain flag-gated in the router until built (Blue) and safety-reviewed (Red) — the 4-way intent is the target once flags open.
+- **D7 — Stage 1 opener (was G-G3). RESOLVED:** "What are 1–3 things at the top of your mind today?" — matches what is already implemented in `content/paths/green.ts`; no change needed.
+- **D8 — Stage 4 tip (was G-G4). RESOLVED (new authored line):** **"We want to reach the flow state by aligning your goals and your actions."** Replaces the drafted `s4-align-day` tip. Content follow-up.
+- **D9 — Quiz tone rubric (was OQ2). Basis RESOLVED:** tone shifts are driven by **Vanessa Van Edwards' communication-styles** material (built on the Big Five); Cat expects "we'll have the API for" it. **Still open:** the concrete A/B/C → communication-style → tone-adjustment mapping, and what the "API"/source actually is. Closely tied to D1 (the source-material store). Scoring stays stubbed / `FF_QUIZ_SCORING` off until the mapping exists.
+- **D10 — Community home (was OQ5). RESOLVED:** build it **in-app**; adopt a **Skool-style forum format** (someone posts, others answer).
+- **D11 — Community scope. RESOLVED (narrows the PRD):** the forum is limited to **parent and teacher accounts only** — questions, answers, and resources — with **no student↔student and no student↔adult** connection. **FLAG (PRD conflict):** PRD §6.4 described student/parent/teacher containers + overlap; Cat's decision supersedes and removes the student community entirely. **Still open:** whether the forum is free or paid, and who moderates it.
+- **D12 — Consent/age (was OQ4). RESOLVED (posture accepted):** 13+ self-check + data minimization now; parental-consent step reserved for the school rollout.
+- **D13 — Tutoring direction (M5). RESOLVED (direction):** anyone who wants to tutor must pass a **background check (criminal history)** against standards TBD; roll out first in a **small geographic area / contained group**, then scale.
+
+**Applies to content/code (follow-up implementation pass — NOT done in this doc update):**
+- Yellow router label → `content/router.ts` (D6), then `pnpm content:lock` + `content:` commit.
+- Stage 4 tip line → `content/paths/green.ts` `s4-align-day` (D8), then re-lock.
+- Depth-cap constant `= 3` + the non-dismissive/no-abrupt reset-tone requirement (D4) → M2-WS4.
+- Trusted-adult "equip with scripts/tools/guidance" behavior (D3) → M2-WS4 safety, once Cat signs off the exact lines.
+- Van Edwards communication-styles rubric (D9) → `lib/personality/scoring.ts` design, gated on the concrete mapping.
+- (The scaffolding-plan OQ register in `docs/plans/scaffolding-plan.md` still shows these as open; sync it in a later pass.)
+
+---
+
 ## Milestone 0 — Live skeleton (COMPLETE)
 
 ### 1. Milestone objective
@@ -101,7 +129,7 @@ Scaffolding plan §M1/§3; PRD §3.1 (six-stage skeleton), §3.2 (paths + fallba
 Everything in M2/M3 below.
 
 ### 6. Dependencies to CLOSE this milestone (not code tasks)
-1. Cat's approve/rewrite pass on `docs/content-review/m1-for-cat.md` — safety copy (crisis intro + trusted-adult prompt) first; then router labels, path drafts, and the two-version decisions G-G3 ("1–3 things" vs "3 things") and G-G4 (which Stage 4 tip line).
+1. Cat's approve/rewrite pass on `docs/content-review/m1-for-cat.md`. **Partially resolved 2026-07-08** (see Decisions): router Yellow label rewritten (D6), G-G3 confirmed (D7), G-G4 given new copy (D8), crisis-copy *intent* given but exact intro/trusted-adult wording still needs sign-off (D3). **Still needs Cat:** the exact crisis lines, and the remaining path-draft microcopy in the review packet.
 2. CI `rls` job observed green on GitHub runners (it could not run in the build sandbox; local Postgres verification passed).
 3. Production E2E (full Green check-in) once SETUP.md provisioning exists.
 
@@ -122,7 +150,7 @@ Met in code per the scaffolding plan §M1: a full Green check-in completes in ve
 
 ### 12. Risks and open questions
 - Cat's approvals are the only content gate; her rewrites land as `content:` commits + `pnpm content:lock`.
-- **OQ2 (quiz scoring rubric)** remains the standing blocker for scoring and everything downstream (M2 tone calibration is limited to per-session Stage-5 choices until then; M5 matching is fully blocked).
+- **OQ2 (quiz scoring rubric)** — basis now set (D9: Vanessa Van Edwards communication-styles on the Big Five), but the concrete A/B/C → style → tone mapping and the source/"API" are still open, so scoring stays stubbed; M5 matching still blocked on the same mapping.
 
 ### 13. Handoff notes for Opus 4.8
 - **Never** edit `content/authored.lock.json` by hand. Never paraphrase a locked string. Content edits = edit the content file → `pnpm content:lock` → `content:` commit.
@@ -160,7 +188,7 @@ Blue/Red content and permeability (M3); Streak System UI, Goal Microflow Tracker
 ### 6. Dependencies
 - M1 complete (it is). Where a needed string is still a Cat-pending draft, ship the draft with its existing `needsCat` marker; where a gap has no authored content (G-list), ship the slot hidden. **Never generate dialogue.**
 - Operator: `LLM_API_KEY` + `LLM_PROVIDER=anthropic` env in preview/production; Stripe account + keys + webhook secret; Supabase/Vercel provisioning from M0 §6.
-- **Assumption (OQ1, needs Cat's confirmation):** Anthropic as provider; a small fast model for adaptation/interpretation/classification; no-training-on-inputs API terms; per-check-in token budget. `verbatim` remains the default and the permanent fallback everywhere.
+- **Provider (D1, still open):** Cat did **not** confirm Anthropic — treat the provider as unchosen. Our recommendation (a small fast Claude model; no-training-on-inputs terms; per-check-in token budget) remains a proposal. `verbatim` stays the default and permanent fallback everywhere. **Also per D1:** Cat's ultimate direction is a Supabase **source-material knowledge base** the AI draws on (beyond the dialogue tree) — planned as design-only **WS9** below, not built in M2's adaptivity workstreams.
 
 ### 7. Implementation plan (ordered; each workstream = one commit-sized unit, CI green at each)
 
@@ -186,8 +214,9 @@ Blue/Red content and permeability (M3); Streak System UI, Goal Microflow Tracker
 1. Migration `supabase/migrations/20260707000003_safety_events.sql`: `safety_events` (id, `category` text, `path` guidepost_path null, `stage` int null, `day` date default current_date) — **NO user_id, NO session_id, NO text** (CLAUDE.md: "No identifiable logging in safety telemetry"). RLS enabled; inserts only via a security-definer `log_safety_event(category, path, stage)` granted to `authenticated`; no select policy (the weekly review per PRD §9 happens via the SQL editor/service role).
 2. Call `log_safety_event` from the crisis branch of `app/api/checkin/route.ts` (after the pause, before the response). Keep the existing guarantee that trigger text is never persisted.
 3. Optional second-pass classifier `lib/llm/safety-classifier.ts`: when the lexicon passes AND provider ≠ verbatim, a cheap LLM yes/no crisis check on free text. The classifier may only ADD flags — it can never clear a lexicon hit (the lexicon is the floor). Timeout-bounded; on timeout/error, proceed as lexicon-passed. Behind env `SAFETY_CLASSIFIER=true`, default off until reviewed.
-4. Reflective-depth cap (PRD §6.3 "pathways cap reflective depth"): add a per-session counter in `SessionState` for consecutive free-text emotional-probe turns; past the cap, the machine offers the authored Mini Reset instead of another probe. **Assumption: cap = 3 — the number and the qualifying nodes are specified nowhere; implement the mechanism, mark `needsCat`, and list it in `docs/content-review/m2-for-cat.md`.**
+4. Reflective-depth cap (PRD §6.3 "pathways cap reflective depth"): add a per-session counter in `SessionState` for consecutive free-text emotional-probe turns; past the cap, the machine offers the authored Mini Reset instead of another probe. **RESOLVED (D4): cap = 3 probing questions.** New requirement: the reset must read as **non-dismissive and not abrupt** — no jarring tone shift (the transition copy is `needsCat`; more layers planned later). Qualifying nodes still need Cat's confirmation; list in `docs/content-review/m2-for-cat.md`.
 5. Extend `tests/rls/policies.test.ts` for `safety_events` (no direct read/write; RPC insert works; anon denied). Re-run the red-team suite.
+6. **Trusted-adult "equip, don't just name" (D3):** the crisis node's trusted-adult beat should give the user **scripts, tools, and guidance** for actually approaching a trusted adult (Cat's direction), not merely suggest one. Implement the *structure* for this (e.g. an authored "how to start that conversation" tool/slot); **the exact copy is `needsCat`** — do not write the scripts here, and re-ask Cat for the intro/trusted-adult wording (her recorded answer was partly an unclear transcription). All of it stays `adaptable: false`.
 
 **WS5 — Remaining in-dialogue tools (structured UI, never text blobs)**
 Content rule for every tool: verbatim strings only, from `docs/tools/reusable-tools.md` + the path docs; gaps ship as hidden slots. Per-tool gap table:
@@ -217,7 +246,7 @@ Content rule for every tool: verbatim strings only, from `docs/tools/reusable-to
 1. Migration `supabase/migrations/20260707000004_billing.sql`: `billing_customers` (user_id unique ↔ stripe_customer_id), `subscriptions` (user_id, stripe_subscription_id, status, current_period_end) — RLS: owner select; NO client write policies (writes happen server-side via webhook/service path only).
 2. `lib/billing/` module: the Stripe SDK is confined here (mirror the LLM-layer boundary rule); checkout-session creation, customer-portal session creation, subscription-status read, entitlement logic.
 3. Routes/actions: `app/(app)/settings/` gains "Upgrade" (checkout) and "Manage / Cancel" (customer portal — this is the "cancel in two taps": settings → portal cancel). `app/api/webhooks/stripe/route.ts`: **signature verification with `STRIPE_WEBHOOK_SECRET` is mandatory**; idempotent event handling (upsert-by-subscription or processed-event-id guard); updates `subscriptions`.
-4. Entitlement: free tier = **1 full check-in per day + unlimited Mini Resets (Assumption per OQ6; config-driven constants — Cat sets final limits and price)**; enforced in `/api/checkin` after auth, with kind copy on the paywall response (draft, `needsCat`). The free tier must remain "genuinely useful — not a teaser" (PRD §6.5).
+4. Entitlement: free tier = **1 full check-in per day + unlimited Mini Resets** — **placeholder accepted by Cat (D2)**; constants stay config-driven and price is TBD (Cat sets later). Enforced in `/api/checkin` after auth, with kind copy on the paywall response (draft, `needsCat`). The free tier must remain "genuinely useful — not a teaser" (PRD §6.5).
 5. CSP: add `js.stripe.com` to `script-src`/`frame-src` in `next.config.ts` — nothing else (the config comment already reserves exactly this).
 6. Tests: webhook signature rejection; idempotency on retry; entitlement window logic (clock-mocked). Manual Stripe test-mode E2E on preview: subscribe → entitled → cancel in two taps; record the result in the PR.
 
@@ -228,6 +257,9 @@ Content rule for every tool: verbatim strings only, from `docs/tools/reusable-to
 3. Session resume: on `/checkin` load, look for the user's most recent `chat_sessions` row with `ended_at IS NULL`; offer "pick up where you left off" (draft copy `needsCat`) vs starting fresh (closes the stale session). The machine already serializes everything needed in `state`.
 4. `docs/content-review/m2-for-cat.md`: every new draft string, the depth-cap assumption, OQ6 numbers, hero script gap G-L1, and the `index.html` questions.
 5. Playwright E2E (CI-able + preview): full Green + Yellow check-ins including evening (mock the client clock), fallback detours, habit toggle, quiz skip and retake, hero interaction, paywall boundary, resume flow.
+
+**WS9 — Source-material knowledge base (DESIGN-ONLY in M2; D1)**
+Cat's ultimate direction (D1) is a Supabase store built from her source material that the AI draws on to answer/guide, because the dialogue tree alone "is not complex enough." This is a real architectural evolution beyond M2's "rephrase authored text only" and must not be built inline — produce a **design doc** (`docs/plans/source-material-kb.md`), do not ship retrieval yet. The design must preserve every non-negotiable: the safety screen still runs first; the **state machine still owns flow** (retrieval informs phrasing/answers within a node, never node/stage selection); no fabricated dialogue or reflection quotes; authored IP stays verbatim and lock-protected; retrieval is grounded only in Cat-approved source material (provenance tracked). Open inputs to resolve first: provider choice (D1), what the "API for the source material" is, and how this reconciles with the deterministic/verbatim guarantees. Gate: Cat + a review sign off the design before any build milestone picks it up.
 
 ### 8. File touchpoints
 `lib/llm/{provider,interpret,safety-classifier}.ts`, `lib/llm/prompts/juniper.ts` · `content/tone/tones.ts` (+ lock) · `tests/evals/*` · `supabase/migrations/20260707000003_safety_events.sql`, `20260707000004_billing.sql` · `app/api/checkin/route.ts` · `app/api/webhooks/stripe/route.ts` · `lib/billing/*` · `components/tools/{start-small-planner,micro-needs-menu,gentle-focus-anchor,mood-matching-visual,evening-wind-down,aha-tracker}.tsx` · `components/guidepost/checkin-client.tsx` · `app/(app)/dashboard/{page.tsx,actions.ts}` · `app/(app)/settings/page.tsx` · `app/(marketing)/page.tsx` · `components/ui/auth-form.tsx` · `next.config.ts` (CSP) · `.env.example` · `docs/{security.md,SETUP.md,content-review/m2-for-cat.md}` · `tests/**`.
@@ -254,9 +286,11 @@ Per commit: `pnpm typecheck && pnpm lint && pnpm test && pnpm build` + `node scr
 9. PRD §10 Phase-1 list is fully present: landing with interactive hero; auth + role selection + onboarding; Green and Yellow end-to-end with evening variants, Mini Reset Toolkit, and reflection quotes; Aha! tracker; habit tracker; safety layer v1; freemium billing; mobile-first.
 
 ### 12. Risks and open questions
-- **OQ1** provider + cost model — Anthropic assumed; confirm before production keys. Token cost at freemium scale unknown; budgets + a partially-verbatim free tier are the levers.
-- **OQ6** free limit + price — placeholders are config-driven; Cat decides.
-- **Depth-cap parameters** (WS4.4) — mechanism specified; numbers are an assumption for Cat.
+- **Provider (D1) still open** — not confirmed by Cat; pick before production keys. Token cost at freemium scale unknown; budgets + a partially-verbatim free tier are the levers.
+- **Source-material KB (D1)** — a genuine architecture shift; WS9 is design-only and gated. Risk: it can quietly erode the "machine owns flow / no fabrication / verbatim IP" guarantees if built without that discipline. Do not let it leak into M2's shipping workstreams.
+- **OQ6 pricing — RESOLVED (D2):** placeholder tiers accepted; price TBD (config-driven).
+- **Depth cap — RESOLVED (D4):** cap = 3; reset must be non-dismissive/not abrupt (transition copy `needsCat`).
+- **Crisis copy (D3)** — intent set (equip with scripts/tools/guidance); exact intro/trusted-adult lines still need Cat (her answer was partly an unclear transcription).
 - **G-L1** hero script — authored-fragments approach until Cat writes it.
 - **`index.html`** mockup: font/CSP conflict + removal question (WS8.1).
 - Stripe webhooks against per-branch preview URLs need per-env endpoint configuration (add to SETUP.md when wiring).
@@ -275,6 +309,8 @@ Per commit: `pnpm typecheck && pnpm lint && pnpm test && pnpm build` + `node scr
 ### 1. Milestone objective
 Enter Cat's Blue (From Disconnection to Awareness) and Red (From Overwhelm to Ownership) paths verbatim, implement mid-flow path permeability, and place Red behind a structurally enforced double gate whose only key is a signed safety review. Production behavior is unchanged until flags flip.
 
+**Framing update (D5, Cat 2026-07-08):** being on the Red Path does **not** by itself mean imminent danger — it means the user is **dysregulated and needs a nervous-system reset**. Users move between paths day-to-day with no positive/negative build-up (Green→Red or Red→Green are both normal). The line between everyday dysregulation and "needs a professional" is set by the **intensity, frequency, and duration** of Red-Path usage over time — that is the core question the safety review must answer (see §7.4c). Red is still gated, but the gate's *purpose* is defining that threshold, not treating every Red session as a crisis. The per-turn crisis lexicon (M1/M2-WS4) is the separate, always-on danger check and is unchanged.
+
 ### 2. Source grounding
 `docs/paths/blue-path.md` (flow, cheat sheet, storyboard); `docs/paths/red-path.md` (Cat confirmed 2026-07-07: repeated sections are text duplication only; the spec is complete); PRD §3.2 (path table + "Paths are permeable" rules), §6.2 (mid-flow shifts per Blue Stage 3), §6.3 (Red/Blue always offer grounding exits; Red has the "tightest integration with the safety/escalation layer"); scaffolding plan §M3 + resolutions C1/C5 (recorded in `docs/plans/scaffolding-plan.md` §0); CLAUDE.md ("The Red Path cannot ship without a dedicated safety review").
 
@@ -283,6 +319,7 @@ Enter Cat's Blue (From Disconnection to Awareness) and Red (From Overwhelm to Ow
 - `validatePathContent()` already accepts external cross-path targets (`externalTargets`, tested with `yellow:entry`-style ids) — but the machine does NOT yet execute cross-path shifts.
 - `content/tools/mini-reset.ts` is typed `Record<"green"|"yellow",…>` — extend for Red's authored toolkit.
 - Quote canon (C5, resolved): Red Stage 6 uses the "Updated for Emotional Resilience" standard + evening sets; the processing-changes beat IS part of Red Stage 5 (storyboard slides 9–10).
+- Router (D6): the entry question is a **4-way** router by user state (Green/Yellow live, Blue/Red flag-gated); the Yellow entry label is now Cat's wording (D6, applied as a content follow-up). Confirm all four entry labels read in Cat's voice when Blue/Red unflag.
 
 ### 4. Scope
 (1) Blue content verbatim; (2) Red content + quotes + toolkit verbatim; (3) cross-path shift mechanics; (4) Red gate enforcement + review template; (5) Blue heart-loud interim while Red is gated; (6) `FF_DASHBOARD_EXTRAS` tools (Streak System UI, Goal Microflow Tracker, Progress Reflection flows — their weekly-pattern prompts and habit-loop templates ARE authored in the path docs); (7) M3 review packet.
@@ -297,7 +334,7 @@ M2 complete (tone eval exists so Blue/Red tags flow through it; Micro-Needs Menu
 1. **Blue content** (`content/paths/blue.ts`, verbatim from `docs/paths/blue-path.md`): S1 surface scan — the three authored user options each with their authored Juniper responses; S2 vibe check with the five verbatim metaphor options (☁️ Numb / 🔁 On autopilot / 📦 Boxed in / 🎭 Faking it / 📏 Managing) + Mood-Matching Visual summon — **S2 per-option branch responses are gap G-B1: route all five to the shared S3 beat until Cat authors them (annotate in code)**; S3 mismatch moment with the four storyboard options → head full = shift `yellow:s1`; heart loud = Red target (see step 5); body tired = Micro-Needs Menu summon then S4; "I honestly don't know" = stay Blue → S4; S4 quiet needspotting (Micro-Needs Menu); S5 reorientation (the four authored option families, with Gentle Focus Anchor / Start Small Planner summons, rest time-block, idk micro-actions); S6 closure/re-entry (stay / → `yellow:s1` / → `green:welcome` / grounding close — **grounding script is G-B3: ship the beat with a hidden slot**) with the five authored reflection tags as Blue's reflection bank. Register in `content/index.ts`; `pnpm content:lock`.
 2. **Red content** (`content/paths/red.ts` + `content/quotes/red.ts` + toolkit extension, verbatim from `docs/paths/red-path.md`): S1 regulation-first physical check (pause-and-care vs proceed); S1B emotional check-in (three authored options); S2 biggest-weight naming — storyboard slide 4's six quick-taps mapped to 3A/3B (**G-R1 assumption; annotate**); S3A name 1–3 priorities (freeText) and S3B Mini Reset branch with Red's authored toolkit (five reset options, self-talk prompts, completion cue "I'm feeling more grounded now") — **ask-for-help scripts (G-R2) and the deadline-reality check (G-R3) ship as annotated hidden slots**; the regulated-shift node per storyboard slide 7 (authored prompt + three options → `green:welcome` / `yellow:s1` / stay); S4 Covey sort with Do Now / Do Later / Delegate / Drop framing (extend `CoveyQuadrantSorter` with a `quadrantLabels` prop — do not fork the component); S5 reality check + re-scope including the processing-changes beat; S6 reflection using the "Updated for Emotional Resilience" standard + evening banks. Put `stillStuck`/`nothingSoundsRight` fallbacks on every Red choice/freeText node — grounding exits everywhere (PRD §6.3).
 3. **Cross-path shifts**: extend `lib/guidepost/machine.ts` to resolve `"<path>:<nodeId>"` targets — `advance` returns a `pathShift` marker in `EngineOutput`; `app/api/checkin/route.ts` handles it by updating `chat_sessions.path`, appending to a new `path_history` jsonb column (migration `supabase/migrations/20260707000005_path_shifts.sql`; RLS unchanged), and swapping the engine context. `SessionState.path` updates; `choices` persist across the shift. The route must check flags at shift time (a shift into a gated path is refused), not only at entry.
-4. **Red gate enforcement**: (a) content-loader guard — Red is exposed only through a function that throws in production builds unless both gate envs are true; (b) a CI test that simulates production + unset flags and asserts Red is unreachable via router AND via shift; (c) `docs/safety/red-path-review.md` template: reviewer identity, scripted crisis-handling transcripts (red-team runs through Red, including lexicon hits mid-Red), escalation-threshold sign-off (G-R5), legal check, and the explicit statement that `RED_PATH_RELEASE_APPROVED` may be set only after signature.
+4. **Red gate enforcement**: (a) content-loader guard — Red is exposed only through a function that throws in production builds unless both gate envs are true; (b) a CI test that simulates production + unset flags and asserts Red is unreachable via router AND via shift; (c) `docs/safety/red-path-review.md` template: reviewer identity, scripted crisis-handling transcripts (red-team runs through Red, including lexicon hits mid-Red), escalation-threshold sign-off (G-R5), legal check, and the explicit statement that `RED_PATH_RELEASE_APPROVED` may be set only after signature. **Per D5, the escalation threshold is framed as intensity/frequency/duration of a user's Red-Path usage — computed from that user's OWN owner-only `chat_sessions` history and surfaced only to them (never to parents/teachers, never in the identifier-free `safety_events` log). Reviewer + timing are still open (human task).**
 5. **Blue heart-loud interim (G-B4)**: while Red is gated, Blue S3 "heart's loud" routes to a grounding-exit node built ONLY from authored material (Blue's Micro-Needs beat + the authored "Can we end with something grounding?" closure option) with one annotated `needsCat` bridge line; it must never dead-end. When Red unflags, retarget to `red:s1` (single-line content change).
 6. **Dashboard extras behind `FF_DASHBOARD_EXTRAS`**: Streak System UI (gentle reset messaging — drafts `needsCat`); Goal Microflow Tracker (CRUD on the existing `goals` table; short/mid/long horizons per PRD §4.2); Progress Reflection flows — end-of-week pattern prompts and habit-loop (cue → craving → response → reward) templates entered VERBATIM from the Green/Yellow/Red docs into `content/tools/weekly-reflection.ts` (+ lock), rendered as a dashboard flow.
 7. **Review packet** `docs/content-review/m3-for-cat.md`: all G-B*/G-R* slots with file locations; the G-R1 quick-tap assumption; separate unflagging checklists for Blue (content approvals only) vs Red (content approvals + signed safety review).
@@ -338,52 +375,54 @@ Full traversal tests for Blue (all S1 options, all four S3 branches, all four S6
 
 ## Milestone 4 — Community & depth (PRD Phase 2)
 
-> **Gate: requires human review of this milestone plan before execution.** Community for minors is a higher-risk surface than anything before it, and OQ5 (build in-app vs host on Skool) is unresolved.
+> **Gate: still requires human review before execution.** OQ5 is resolved (D10: in-app), and D11 sharply narrows scope — but community is Cat's call on paid/free + moderation staffing, and it's the first role-gated surface.
+
+**Scope reframed by Cat (D10 + D11, 2026-07-08):** build it **in-app** with a **Skool-style forum** (post → others answer), and **limit the forum to parent and teacher accounts only** — Q&A + resources. **No student community: no student↔student and no student↔adult connection.** This removes the student container entirely and drops the students-as-UGC-authors risk. **PRD conflict recorded:** PRD §6.4 described student/parent/teacher containers + overlap; **Cat's decision supersedes it.**
 
 ### 1. Milestone objective
-Ship the community layer: separate containers for students, parents, and teachers with intentional overlap spaces, moderation and report flows from day one, the referral incentive, and chat-history UI — completing PRD Phase 2 alongside M3's paths and dashboard tools.
+Ship a **parent-and-teacher** community: an in-app, Skool-style Q&A/resource forum for adult accounts, with moderation and report flows from day one, the referral incentive, and chat-history UI for students — completing PRD Phase 2 (as narrowed by D11) alongside M3's paths and dashboard tools. Students do not post or read the forum.
 
 ### 2. Source grounding
-PRD §2 (parent/teacher personas), §6.4 (containers; role-aware visibility; "moderation tooling and report flows from day one of the feature"; referral "framed as sharing help, not growth hacking"), §7 (`posts` sketch), §10 Phase 2, §11 (OQ5, moderation staffing); brief §Roadmap; CLAUDE.md (community stub; referral incentive "post-signup, never as a gate"); the landing page's honest "Community — coming" card.
+PRD §2 (parent/teacher personas), §6.4 (moderation + report flows "from day one"; referral "framed as sharing help, not growth hacking" — **but its student container + overlap spaces are superseded by D11**), §7 (`posts` sketch), §10 Phase 2, §11 (moderation staffing); Decisions D10/D11; brief §Roadmap; CLAUDE.md (community stub; referral "post-signup, never as a gate"); the landing page's honest "Community — coming" card.
 
 ### 3. Current state
 `app/(app)/community/` is an empty auth-protected stub. `profiles.role` exists (student/parent/teacher — currently self-descriptive). Nothing else. **Standing rule from migration 0001's comment: the moment `role` gates any read, the profile policies and the role-change path must be re-reviewed — role changes likely move server-side here.**
 
 ### 4. Scope
-1. Migration `20260707000006_community.sql`: `posts` (author_id, container enum student/parent/teacher/overlap, content, created_at), `post_reports` (post_id, reporter_id, reason, status), `moderation_actions`. RLS design task — container visibility by role: students see student + overlap; parents see parent + overlap; teachers see teacher + overlap (**derived from PRD §6.4 "role-aware visibility"; the exact matrix is an Assumption for Cat to confirm**); author-only edit/delete; reports writable by any member, readable only by moderators.
-2. Role hardening: move `profiles.role` changes server-side; re-review the 0001 policies per its comment.
+1. Migration `20260707000006_community.sql`: `posts` (author_id, content, created_at — **no student container per D11**; a single adult forum, optionally a `topic`/`category` field for Q&A vs resources), `post_reports` (post_id, reporter_id, reason, status), `moderation_actions`. **RLS (simplified by D11):** read/write allowed only to accounts whose `profiles.role` is `parent` or `teacher`; **students have no access to `posts` at all** (policy denies student role outright); author-only edit/delete; reports writable by any forum member, readable only by moderators. This is the first place `role` gates reads — so the matrix is just {student = none, parent/teacher = full forum}.
+2. Role hardening: move `profiles.role` changes server-side; re-review the 0001 policies per its comment (now load-bearing, since `role` gates forum access).
 3. Community UI: container feeds, post composer (length-limited; no media in v1 — Assumption), a report button on every post, removed/pending states.
 4. Moderation surface: a minimal moderator queue (**Open question: who moderates and how moderators are designated — PRD §11 leaves staffing open**), remove/restore actions, report resolution.
 5. Referral incentive: invite code/link + attribution, surfaced post-signup only, never a gate; **reward mechanics are an Open question for Cat** (PRD §6.4 says only "reward for bringing someone in") — scaffold codes + attribution, leave the reward config-driven.
-6. Chat history UI: list of past check-in sessions (path, date, chosen reflection) reading the existing `chat_sessions`/`chat_messages`/`reflections` — owner-only, already RLS-safe ("continuity, not surveillance", PRD §7).
-7. Safety: post text runs through `lib/llm/safety.screen()` BEFORE persisting; on a crisis hit, resources are shown privately to the author and the post is not published. Peer content risk is additionally covered by the report flow.
+6. Chat history UI: list of past check-in sessions (path, date, chosen reflection) reading the existing `chat_sessions`/`chat_messages`/`reflections` — owner-only, already RLS-safe ("continuity, not surveillance", PRD §7). This is student-facing and unrelated to the adult forum.
+7. Safety: adult post text still runs through `lib/llm/safety.screen()` BEFORE persisting (adults can be in crisis too); on a hit, resources shown privately to the author and the post not published. Report flow covers peer content. (Student-UGC risk is now moot — students can't post.)
 
 ### 5. Out of scope
 Tutoring (M5); any parent/teacher visibility into student dialogue/reflection/personality data (never without an explicit consent feature and its own review); media uploads; direct messages (not in the PRD).
 
 ### 6. Dependencies
-M2 (safety layer; billing — **Open question: PRD §6.5 lists community under the Paid tier while the free tier lists check-in/reflection/habits. Assumption: community requires paid or a beta flag; Cat confirms**). **OQ5 must be decided before building: if Skool hosts early community, this milestone collapses to an external-link card + referral codes.**
+M2 (safety layer; billing). **OQ5 RESOLVED (D10): in-app, not Skool.** **Still open for Cat:** is the forum free or part of the paid tier (D11 left price/tier unstated), and **who moderates** (PRD §11 staffing still open).
 
-### 7. Implementation plan (condensed pending the OQ5 decision + human review)
-Ordered: 0006 migration + the largest RLS matrix test expansion yet (three roles × four containers × read/write cases) → role hardening → feeds/composer → report flow → moderation queue → referral codes + attribution → chat-history UI → safety screening on posts → `docs/content-review/m4-for-cat.md` (all UI copy drafts; **community guidelines text does not exist anywhere — Cat must author or approve it before launch**).
+### 7. Implementation plan (condensed; simplified by D11, still needs human review)
+Ordered: 0006 migration + RLS tests for the {student = no access, parent/teacher = full forum} rule → role hardening (role now gates reads) → forum feed/composer (adult-only) → report flow → moderation queue → referral codes + attribution → student chat-history UI → safety screening on adult posts → `docs/content-review/m4-for-cat.md` (all UI copy drafts; **community guidelines text does not exist anywhere — Cat must author or approve it before launch**).
 
 ### 8. File touchpoints
 `supabase/migrations/20260707000006_community.sql` · `app/(app)/community/**` · `app/(app)/dashboard/` (history entry point) · `components/community/**` · `lib/supabase/` (no changes expected) · `tests/rls/**` (matrix), `tests/**` · `docs/content-review/m4-for-cat.md`, `docs/security.md`.
 
 ### 9. Data and state implications
-First role-gated reads in the system — the RLS matrix is the core risk surface. Reports and moderation actions must not leak reporter identity to authors. Post content is user-generated: same minors-first posture (no analytics on it, safety screen before persist).
+First role-gated reads in the system — the `role`-based `posts` policy is the core risk surface (students must get zero rows). Reports and moderation actions must not leak reporter identity to authors. Adult posts are user-generated: safety screen before persist, no analytics on content.
 
 ### 10. Testing and verification
-RLS matrix tests (every role × container combination, plus moderator/none); report-flow integration tests (reported → hidden pending → restored/removed); referral attribution unit tests; Playwright: post → report → moderate cycle across two accounts; regression: all M1–M3 suites stay green.
+RLS tests for the D11 rule: **a student account gets zero `posts` rows and cannot insert; parent/teacher accounts read/write the forum; anon denied.** Report-flow integration tests (reported → hidden pending → restored/removed); referral attribution unit tests; Playwright: post → report → moderate cycle across two adult accounts + a student account proving no forum access; regression: all M1–M3 suites stay green.
 
 ### 11. Acceptance criteria
-Cross-role visibility matrix proven by tests; a reported post disappears from feeds pending moderation; referral attribution is recorded and never gates anything; zero student dialogue/reflection/personality data readable by any parent/teacher account (re-proven); history lists only the owner's sessions.
+Students provably cannot read or write `posts` (tested); parent/teacher forum works; a reported post disappears pending moderation; referral attribution is recorded and never gates anything; zero student dialogue/reflection/personality data readable by any adult account (re-proven); student chat-history lists only the owner's sessions.
 
 ### 12. Risks and open questions
-OQ5 build-vs-Skool (blocks the milestone); moderation staffing; the visibility matrix and community-in-paid-tier assumptions; community guidelines content does not exist; minors + user-generated content = elevated legal/safety surface (revisit OQ4 legal review before launch).
+Free-vs-paid tier for the forum + moderation staffing (both still Cat's call, D11); community guidelines content does not exist (Cat must author); the `role` gate is now security-critical (role changes must be server-side + re-reviewed). D11 materially lowers the minors-UGC risk that dominated the earlier plan.
 
 ### 13. Handoff notes for Opus 4.8
-Do not start M4 without: (a) Cat's OQ5 decision, (b) the visibility matrix confirmed, (c) human sign-off on this milestone plan. The privacy invariant is absolute: community features must not create ANY read path into check-ins, reflections, aha moments, or personality data.
+Do not start M4 without: (a) Cat's free/paid + moderation-staffing calls, (b) human sign-off on this milestone plan, (c) the community-guidelines text from Cat. The privacy invariant is absolute: community features must not create ANY read path into check-ins, reflections, aha moments, or personality data — and per D11, students have no forum access at all.
 
 ---
 
@@ -401,7 +440,7 @@ PRD §3.4 Purpose 3 (quiz → matching), §10 Phase 3, §9 (180-day signals: mat
 `personality_profiles` exists (raw answers + `quiz_version`; scores null pending OQ2). Nothing else.
 
 ### 4. Scope (sketch — to be expanded by the future planning pass)
-Tutor role and profiles (**tutors are adults interacting with minors: identity/vetting/safeguarding is an unavoidable trust-and-safety workstream that no current doc specifies — flagged**); matching inputs (personality per the OQ2 rubric + needs + interests); match presentation (PRD §3.4: "the profile informs tone; it never boxes the user in or appears as a label" — no personality labels shown); scheduling and session management; school-tier interplay (OQ4 school-as-provider consent model).
+Tutor role and profiles; matching inputs (personality per the D9/OQ2 rubric + needs + interests); match presentation (PRD §3.4: "the profile informs tone; it never boxes the user in or appears as a label" — no personality labels shown); scheduling and session management; school-tier interplay (OQ4 school-as-provider consent model). **Safeguarding direction (D13, Cat 2026-07-08):** every prospective tutor must pass a **background check (criminal history)** against standards TBD; launch in a **small geographic area / contained user group first, then scale**. (This is the trust-and-safety workstream the earlier draft flagged as unspecified — now it has Cat's direction, though the concrete vetting standards and provider are still to be defined.)
 
 ### 5. Out of scope
 Everything, until a dedicated plan exists.
@@ -425,7 +464,7 @@ Deferred; will require its own RLS matrix (tutor role) and consent-flow tests.
 Deferred to the dedicated planning pass.
 
 ### 12. Risks and open questions
-OQ2 rubric; consent UX for minors sharing profile signals; tutor vetting and safeguarding policy (needs human policy work); payments for tutoring sessions (unspecified); school distribution consent model (OQ4).
+D9/OQ2 rubric; consent UX for minors sharing profile signals; the concrete tutor **vetting standards + background-check provider** (D13 set the requirement, not the standard); phased-rollout geography (D13); payments for tutoring sessions (unspecified); school distribution consent model (OQ4).
 
 ### 13. Handoff notes for Opus 4.8
 Do not implement anything M5 without a new approved plan. Until then, protect the enablers: keep `personality_profiles` owner-only, keep raw answers + `quiz_version` intact, and keep `goals`/`aha_moments` clean — they are future matching signals.
@@ -436,7 +475,7 @@ Do not implement anything M5 without a new approved plan. Until then, protect th
 
 **Sequencing.** M2 → M3 strictly in the order written (within M2: WS1–WS4 before WS5–WS8; WS3's eval before any prompt iteration). M4 and M5 are gated on human review and open-question resolution — do not start them autonomously. Close out M1's pending items (Cat's approvals) as `content:` commits whenever they arrive, independent of where you are in the sequence.
 
-**Branch and PR reality.** `main` does not contain the app (PR #1 was merged early with only the plan doc). Work on `claude/trailhead-scaffolding-plan-j36q96` (or its successor), keep commits small and pushed, and land the M0/M1 body on `main` via a fresh PR before or alongside M2 work. Never push to other branches without explicit permission.
+**Branch and PR reality.** `main` now contains the full application (M0/M1 fast-forwarded on 2026-07-07). Work on `claude/trailhead-scaffolding-plan-j36q96` (or its successor), keep commits small and pushed, and land work on `main` via fast-forward/PR keeping the two in sync. Never push to other branches without explicit permission.
 
 **Per-commit validation gate (non-negotiable):** run `pnpm format`, then `pnpm typecheck && pnpm lint && pnpm test && pnpm build` plus `node scripts/check-tokens.mjs` — all green before every commit. CI must stay green on every push.
 
