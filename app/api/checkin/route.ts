@@ -20,7 +20,9 @@ import {
   type SessionState,
 } from "@/lib/guidepost/types";
 import { screen } from "@/lib/llm/safety";
-import { getProvider } from "@/lib/llm/provider";
+import { getProvider, streamAuthored } from "@/lib/llm/provider";
+import { adaptMessage } from "@/lib/llm/adapt";
+import { recalibratedTone } from "@/content/tone/tones";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 import { createFixedWindowLimiter } from "@/lib/utils/rate-limit";
@@ -288,6 +290,9 @@ function sseHeaders() {
 
 function sse(output: EngineOutput, sessionId: string): Response {
   const provider = getProvider();
+  // Stage-5 recalibration (PRD §3.3) overrides the node's own tone for the
+  // rest of the session; falls back to the node tone before any Stage-5 pick.
+  const tone = recalibratedTone(output.state.choices) ?? output.toneTag;
   const encoder = new TextEncoder();
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
@@ -297,9 +302,13 @@ function sse(output: EngineOutput, sessionId: string): Response {
         );
       for (const message of output.messages) {
         send("message", { nodeId: message.nodeId });
-        for await (const chunk of provider.stream([
-          { role: "assistant", content: message.text },
-        ])) {
+        // `adaptMessage` rephrases only `adaptable` lines under a real
+        // provider and falls back to authored text on any LLM error. Safety,
+        // reflection quotes, and acknowledgments marked `adaptable: false`
+        // are byte-identical (PRD §6.2). The resolved line is then chunked by
+        // the verbatim streamer so the SSE `token` framing is uniform.
+        const text = await adaptMessage(provider, message, tone);
+        for await (const chunk of streamAuthored(text)) {
           send("token", { text: chunk });
         }
       }
