@@ -51,6 +51,7 @@ export function CheckinClient({
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
+  const [horizon, setHorizon] = useState<string[] | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -366,6 +367,43 @@ export function CheckinClient({
                   {FALLBACK_LABELS[kind]}
                 </button>
               ))}
+              {frame.fallbacks.includes("stillStuck") ? (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      const res = await fetch("/api/weekly-horizon");
+                      if (!res.ok) return;
+                      const data = (await res.json()) as {
+                        intentions?: string[];
+                      };
+                      setHorizon(data.intentions ?? []);
+                    } catch {
+                      // Non-blocking convenience; ignore fetch errors.
+                    }
+                  }}
+                  className="min-h-9 rounded-full border border-sand/60 px-3 text-xs text-ink/70 transition-colors hover:border-calm hover:text-depth focus-visible:outline-2 focus-visible:outline-depth"
+                >
+                  Show me my Weekly Horizon
+                </button>
+              ) : null}
+            </div>
+          ) : null}
+
+          {horizon ? (
+            <div className="mt-1 rounded-lg border border-sand/50 bg-calm/10 p-3">
+              {horizon.length > 0 ? (
+                <ul className="flex flex-col gap-1 text-sm text-depth">
+                  {horizon.map((intention, i) => (
+                    <li key={i}>• {intention}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-ink/70">
+                  You haven’t set a Weekly Horizon yet — you can add one from
+                  your dashboard.
+                </p>
+              )}
             </div>
           ) : null}
         </div>
