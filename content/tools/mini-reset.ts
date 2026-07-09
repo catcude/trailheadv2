@@ -10,7 +10,10 @@ export interface MiniResetToolkit {
   reentry: string;
 }
 
-export const miniResetToolkits: Record<"green" | "yellow", MiniResetToolkit> = {
+export const miniResetToolkits: Record<
+  "green" | "yellow" | "red",
+  MiniResetToolkit
+> = {
   green: {
     sourceRef: "paths/green-path.md §Green Path – Mini Reset Toolkit",
     sections: [
@@ -68,5 +71,33 @@ export const miniResetToolkits: Record<"green" | "yellow", MiniResetToolkit> = {
     ],
     reentry:
       "Feeling a little more grounded? Let’s head back in and choose something small to begin with.",
+  },
+  red: {
+    sourceRef: "paths/red-path.md §Red Path – Mini Reset Toolkit",
+    sections: [
+      {
+        heading: "🛠️ Mini Reset Options",
+        actions: [
+          "3-minute breathing exercise (box breathing or square breathing)",
+          "Grounding sensory scan (5-4-3-2-1 method: sight, sound, touch, smell, taste)",
+          "Drink a glass of cold water slowly and name one feeling",
+          "Walk to a different room or go outside for 90 seconds",
+          "Do one slow stretch and shake out your arms",
+        ],
+      },
+      {
+        heading: "💬 Optional Self-Talk Prompts",
+        actions: [
+          "It’s okay to pause. I’m not falling behind.",
+          "I can reset without solving everything first.",
+          "I deserve care even when I’m not productive.",
+        ],
+      },
+    ],
+    // Reentry is a team draft (needsCat / gap G-R2-adjacent): the doc gives a
+    // completion CUE ("I'm feeling more grounded now"), not a Juniper reentry
+    // sentence. Flagged in m3-for-cat.md.
+    reentry:
+      "Feeling more grounded now? When you’re ready, we’ll head back in and name what matters.",
   },
 };

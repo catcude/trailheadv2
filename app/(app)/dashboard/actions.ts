@@ -80,3 +80,27 @@ export async function addAha(text: string, tag: string | null) {
     .insert({ user_id: user.id, text: clean, tag: tag?.trim() || null });
   revalidatePath("/dashboard");
 }
+
+/**
+ * Goal Microflow (M3 dashboard extra, FF_DASHBOARD_EXTRAS). CRUD on the
+ * existing `goals` table (short/mid/long horizons). Owner-only via RLS.
+ */
+const GOAL_HORIZONS = ["short", "mid", "long"] as const;
+const GOAL_STATUSES = ["active", "done", "paused", "dropped"] as const;
+
+export async function createGoal(formData: FormData) {
+  const title = String(formData.get("title") ?? "").trim();
+  const horizon = String(formData.get("horizon") ?? "");
+  if (!title || title.length > 200) return;
+  if (!(GOAL_HORIZONS as readonly string[]).includes(horizon)) return;
+  const { supabase, user } = await requireUser();
+  await supabase.from("goals").insert({ user_id: user.id, horizon, title });
+  revalidatePath("/dashboard");
+}
+
+export async function setGoalStatus(goalId: string, status: string) {
+  if (!(GOAL_STATUSES as readonly string[]).includes(status)) return;
+  const { supabase } = await requireUser();
+  await supabase.from("goals").update({ status }).eq("id", goalId);
+  revalidatePath("/dashboard");
+}

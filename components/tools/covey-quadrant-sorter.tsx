@@ -25,12 +25,23 @@ export function CoveyQuadrantSorter({
   onDone,
   disabled,
   items: seed,
+  quadrantLabels,
 }: {
   onDone: (result: CoveySorterResult) => void;
   disabled?: boolean;
   /** Pre-filled items from the brain-dump interpretation (WS2); editable. */
   items?: string[];
+  /**
+   * Optional label overrides, in QUADRANTS order (M3, Red path's Do Now / Do
+   * Later / Delegate / Drop framing). Quadrant IDs are unchanged so sorted
+   * results stay stable; only the button text differs.
+   */
+  quadrantLabels?: readonly string[];
 }) {
+  const quadrants = QUADRANTS.map((q, i) => ({
+    ...q,
+    label: quadrantLabels?.[i] ?? q.label,
+  }));
   const [draft, setDraft] = useState("");
   const [items, setItems] = useState<{ text: string; quadrant?: QuadrantId }[]>(
     () => (seed ?? []).map((text) => ({ text })),
@@ -84,7 +95,7 @@ export function CoveyQuadrantSorter({
           <li key={index} className="flex flex-col gap-1.5">
             <span className="text-sm font-medium">{item.text}</span>
             <div className="flex flex-wrap gap-1.5">
-              {QUADRANTS.map((q) => (
+              {quadrants.map((q) => (
                 <button
                   key={q.id}
                   type="button"

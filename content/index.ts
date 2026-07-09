@@ -1,10 +1,15 @@
 import type { PathContent, PathId, QuoteBank } from "./schema";
 import { green } from "./paths/green";
 import { yellow } from "./paths/yellow";
+import { blue } from "./paths/blue";
+import { red } from "./paths/red";
 import { greenQuotes } from "./quotes/green";
 import { yellowQuotes } from "./quotes/yellow";
+import { blueQuotes } from "./quotes/blue";
+import { redQuotes } from "./quotes/red";
 import { miniResetToolkits } from "./tools/mini-reset";
 import { dialogueTools } from "./tools/dialogue-tools";
+import { weeklyReflection } from "./tools/weekly-reflection";
 import { bigFiveQuiz } from "./quiz/big-five";
 import { routerPrompt, routerOptions } from "./router";
 import { crisisContent } from "./safety/crisis";
@@ -21,11 +26,15 @@ import { crisisContent } from "./safety/crisis";
 export const paths: Partial<Record<PathId, PathContent>> = {
   green,
   yellow,
+  blue,
+  red,
 };
 
 export const quoteBanks: Partial<Record<PathId, QuoteBank>> = {
   green: greenQuotes,
   yellow: yellowQuotes,
+  blue: blueQuotes,
+  red: redQuotes,
 };
 
 export function collectAuthoredStrings(): Record<string, string> {
@@ -90,6 +99,13 @@ export function collectAuthoredStrings(): Record<string, string> {
       }
     }
   }
+
+  weeklyReflection.habitLoop.forEach((line, i) => {
+    out[`weekly-reflection/loop/${i}`] = line;
+  });
+  weeklyReflection.weeklyPrompts.forEach((line, i) => {
+    out[`weekly-reflection/weekly/${i}`] = line;
+  });
 
   out["router/prompt"] = routerPrompt.text;
   for (const option of routerOptions) {

@@ -9,10 +9,15 @@ import {
 } from "@/lib/guidepost/api-schema";
 import {
   advance,
+  enterPathAt,
   startSession,
   type EngineContext,
 } from "@/lib/guidepost/machine";
-import { routeEntry } from "@/lib/guidepost/router";
+import {
+  assertPathServable,
+  isPathAllowed,
+  routeEntry,
+} from "@/lib/guidepost/router";
 import { composeSafetyMessages } from "@/lib/guidepost/safety-messages";
 import {
   EngineInputError,
@@ -132,6 +137,7 @@ export async function POST(request: NextRequest) {
           { status: 402 },
         );
       }
+      assertPathServable(path, flags);
       content = pathContent;
       const ctx: EngineContext = { content, quoteBanks };
       const output = startSession(ctx, variant);
@@ -158,7 +164,7 @@ export async function POST(request: NextRequest) {
     sessionId = body.sessionId;
     const loaded = await supabase
       .from("chat_sessions")
-      .select("id, path, state")
+      .select("id, path, state, path_history")
       .eq("id", sessionId)
       .single();
     if (loaded.error || !loaded.data) {
@@ -168,6 +174,10 @@ export async function POST(request: NextRequest) {
     if (!pathContent) {
       return NextResponse.json({ error: "session not found" }, { status: 404 });
     }
+    if (!isPathAllowed(pathContent.path, flags)) {
+      return NextResponse.json({ error: "session not found" }, { status: 404 });
+    }
+    assertPathServable(pathContent.path, flags);
     content = pathContent;
     const state = loaded.data.state as SessionState;
     const ctx: EngineContext = { content, quoteBanks };
@@ -231,6 +241,49 @@ export async function POST(request: NextRequest) {
     // 6. Advance — only the deterministic machine moves the user.
     const preNode = content.nodes[state.currentNodeId];
     const output = advance(state, body.input, ctx);
+
+    // 6-shift. Path permeability (M3): the machine hands back a shift marker;
+    // the route (never the LLM) swaps the active path. The target path's flag
+    // is checked HERE, at shift time — a shift into a gated path is refused
+    // exactly as router entry is, so gating can't be bypassed mid-session.
+    if (output.pathShift) {
+      const { path: toPath, nodeId } = output.pathShift;
+      if (!isPathAllowed(toPath, flags)) {
+        return NextResponse.json({ error: "invalid request" }, { status: 400 });
+      }
+      assertPathServable(toPath, flags);
+      const shiftedContent = paths[toPath];
+      if (!shiftedContent) {
+        return NextResponse.json({ error: "invalid request" }, { status: 400 });
+      }
+      const shifted = enterPathAt(
+        { content: shiftedContent, quoteBanks },
+        output.state,
+        nodeId,
+        output.messages,
+      );
+      const priorHistory = Array.isArray(loaded.data.path_history)
+        ? (loaded.data.path_history as unknown[])
+        : [];
+      const historyEntry = {
+        from: content.path,
+        to: toPath,
+        atNode: preNode?.id ?? state.currentNodeId,
+        at: new Date().toISOString(),
+      };
+      await persistTurn(
+        supabase,
+        sessionId,
+        userMessage,
+        shifted,
+        preNode?.stage,
+        {
+          path: toPath,
+          path_history: [...priorHistory, historyEntry],
+        },
+      );
+      return sse(shifted, sessionId);
+    }
 
     // 6a. Free-text interpretation (WS2): seed the Covey sorter with the
     // student's brain-dump items. The machine still owns flow — this only
@@ -338,6 +391,7 @@ async function persistTurn(
   userMessage: string | null,
   output: EngineOutput,
   userStage?: number,
+  extraSession?: Record<string, unknown>,
 ) {
   const rows: {
     session_id: string;
@@ -371,6 +425,7 @@ async function persistTurn(
       current_node: output.state.currentNodeId,
       state: output.state,
       ended_at: output.done ? new Date().toISOString() : null,
+      ...extraSession,
     })
     .eq("id", sessionId);
   if (error) throw error;

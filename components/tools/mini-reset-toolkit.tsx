@@ -14,7 +14,7 @@ export function MiniResetToolkit({
   onDone,
   disabled,
 }: {
-  toolkit: "green" | "yellow";
+  toolkit: "green" | "yellow" | "red";
   onDone: (result: { tried: string | null }) => void;
   disabled?: boolean;
 }) {

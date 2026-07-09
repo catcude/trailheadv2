@@ -283,6 +283,11 @@ export function CheckinClient({
                   ? (frame.tool.props.items as string[])
                   : undefined
               }
+              quadrantLabels={
+                Array.isArray(frame.tool.props?.quadrantLabels)
+                  ? (frame.tool.props.quadrantLabels as string[])
+                  : undefined
+              }
               onDone={(result: CoveySorterResult) =>
                 send({ type: "toolResult", payload: result }, "Sorted ✓")
               }
@@ -292,7 +297,8 @@ export function CheckinClient({
           {frame.tool?.type === "miniResetToolkit" ? (
             <MiniResetToolkit
               toolkit={
-                (frame.tool.props?.toolkit as "green" | "yellow") ?? "green"
+                (frame.tool.props?.toolkit as "green" | "yellow" | "red") ??
+                "green"
               }
               disabled={pending}
               onDone={(result) =>
