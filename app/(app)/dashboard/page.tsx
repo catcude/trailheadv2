@@ -9,6 +9,13 @@ import { AhaLog, type AhaView } from "@/components/dashboard/aha-log";
 import { WeeklyHorizonEditor } from "@/components/dashboard/weekly-horizon-editor";
 import { computeStreak } from "@/lib/utils/streak";
 import { currentWeekStart } from "@/lib/utils/week";
+import { getFlags } from "@/lib/flags";
+import {
+  GoalMicroflow,
+  type GoalView,
+} from "@/components/dashboard/goal-microflow";
+import { StreakPanel } from "@/components/dashboard/streak-panel";
+import { ProgressReflection } from "@/components/dashboard/progress-reflection";
 
 // Per-user page: always rendered at request time (auth via cookies).
 export const dynamic = "force-dynamic";
@@ -81,6 +88,17 @@ export default async function DashboardPage() {
     ? (horizon.intentions as string[])
     : [];
 
+  const flags = getFlags();
+  let goals: GoalView[] = [];
+  if (flags.dashboardExtras) {
+    const { data: goalRows } = await supabase
+      .from("goals")
+      .select("id, horizon, title, status")
+      .not("status", "in", "(dropped)")
+      .order("created_at", { ascending: true });
+    goals = (goalRows ?? []) as GoalView[];
+  }
+
   const { data: reflectionRows } = await supabase
     .from("reflections")
     .select("id, quote_text, created_at")
@@ -147,6 +165,27 @@ export default async function DashboardPage() {
           ) : null}
         </ul>
       </Card>
+
+      {flags.dashboardExtras ? (
+        <>
+          <Card>
+            <h2 className="mb-2 font-semibold text-depth">Streaks</h2>
+            <StreakPanel habits={habits} />
+          </Card>
+
+          <Card>
+            <h2 className="mb-2 font-semibold text-depth">Goals</h2>
+            <GoalMicroflow goals={goals} />
+          </Card>
+
+          <Card>
+            <h2 className="mb-2 font-semibold text-depth">
+              Progress reflection
+            </h2>
+            <ProgressReflection />
+          </Card>
+        </>
+      ) : null}
     </main>
   );
 }
