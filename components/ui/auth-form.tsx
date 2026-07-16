@@ -36,42 +36,48 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
     event.preventDefault();
     setPending(true);
     setMessage(null);
-    const supabase = createClient();
 
-    if (mode === "sign-in") {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (error) {
-        setMessage("That email and password don't match. Try again?");
-        setPending(false);
-        return;
-      }
-      router.push(next);
-      router.refresh();
-    } else {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${location.origin}/auth/callback?next=/onboarding`,
-        },
-      });
-      if (error) {
-        setMessage("Something didn't work there. Try again?");
-        setPending(false);
-        return;
-      }
-      if (data.session) {
-        router.push("/onboarding");
+    try {
+      const supabase = createClient();
+
+      if (mode === "sign-in") {
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        if (error) {
+          setMessage("That email and password don't match. Try again?");
+          setPending(false);
+          return;
+        }
+        router.push(next);
         router.refresh();
       } else {
-        setMessage(
-          "Check your email for a confirmation link — then you're in.",
-        );
-        setPending(false);
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${location.origin}/auth/callback?next=/onboarding`,
+          },
+        });
+        if (error) {
+          setMessage("Something didn't work there. Try again?");
+          setPending(false);
+          return;
+        }
+        if (data.session) {
+          router.push("/onboarding");
+          router.refresh();
+        } else {
+          setMessage(
+            "Check your email for a confirmation link — then you're in.",
+          );
+          setPending(false);
+        }
       }
+    } catch {
+      setMessage("Something didn't work there. Try again?");
+      setPending(false);
     }
   }
 
@@ -81,13 +87,23 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
       return;
     }
     setPending(true);
-    const supabase = createClient();
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
-      },
-    });
+    setMessage(null);
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
+        },
+      });
+      if (error) {
+        setMessage("Something didn't work there. Try again?");
+        setPending(false);
+      }
+    } catch {
+      setMessage("Something didn't work there. Try again?");
+      setPending(false);
+    }
   }
 
   return (
