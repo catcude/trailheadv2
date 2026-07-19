@@ -1,0 +1,93 @@
+Trailhead
+Product Brief — Guidepost adaptive support system
+Prepared July 2026 • Founder: Cat Cude • Source: Parker L Corp Blueprint Session, Guidepost design
+documents
+The One-Liner
+Trailhead is an adaptive daily guide that helps students regulate their nervous systems, build
+executive functioning skills, and keep up academically — all in one place, grounded in
+peer-reviewed science, and priced so that the kids who need it most can actually have it.
+Why It Exists
+Cat is a teacher who struggled in school herself — not because she lacked ability, but because
+she lacked support. As an educator, she watched the same pattern repeat: students carrying
+trauma, instability, or unmet basic needs arrive at school with dysregulated nervous systems.
+Their performance says almost nothing about what they're capable of. A hungry kid worried about
+their siblings' safety cannot care about erosion or multiplication facts — and when school responds
+with discipline instead of support, the cycle of suspension and labeling dictates their path.
+Meanwhile, even high-achieving students are burning out. They've learned to perform, but no one
+has taught them to manage their minds, emotions, and priorities. Parents are stretched thin and
+feel they've lost their voice. Education is polarizing, and access increasingly follows money.
+Trailhead is the interruption: an accessible, science-based guide that teaches students what they
+were never taught — how to notice what they need, process what's hard, and move forward
+anyway.
+What It Is
+The core product is Guidepost, an adaptive check-in and dialogue system led by Juniper, a
+warm, real, non-clinical guide character. Each day, Juniper meets the user where they are and
+routes them down one of four adaptive paths:
+Green Path From Intention to Alignment — for users with energy and clarity who need
+structure. Priority sorting (Covey quadrants), calendar alignment, habit
+stacking, reflection.
+Yellow Path From Stuck to Steady — for users who know what to do but can't start. Five
+adaptive branches: physical, emotional, overload, procrastination, frozen.
+Blue Path From Disconnection to Awareness — for the “I'm fine” user. Gentle surface
+scans, mood-matching, quiet needspotting, soft re-entry.
+Red Path From Overwhelm to Ownership — for emotionally flooded or shut-down
+days. Regulation first (sleep, food, hydration), name the weight, plan-or-reset
+branching, and resilience reflections (with escalation safeguards).
+Every path is grounded in the same frameworks: Maslow's hierarchy of needs, CASEL SEL
+competencies, Covey's time-management quadrants, Atomic Habits, and behavioral science. The
+dialogue teaches nervous system regulation without calling it that — through prompts,
+redirections, and tools, not lectures.
+Onboarding begins with Discover Your Path — a 5-minute intropersonal quiz based on the Big
+Five personality dimensions (openness, conscientiousness, extraversion, agreeableness,
+emotional resilience) that teaches Juniper how each person communicates and learns,
+personalizes the experience, and later powers tutor matching. Answers are confidential and used
+only to shape the experience.
+Around the dialogue sits a dashboard of reusable tools — habit tracker, streak system, Weekly
+Horizon planner, goal microflow tracker, Aha! moment logger — plus a community layer for
+students, parents, and teachers, and eventually AI-assisted tutor matching.
+Who It's For
+• Primary — the student who has tried. Teens who genuinely want to do better and can't
+figure out how. What they gain first is hope: feet back on the ground, able to breathe, not so
+alone.
+• The high achiever who is quietly unwell. Performers with structure and success on paper
+who are burning out underneath.
+• Parents — stretched thin, worried, unsure how to guide kids in today's world.
+• Teachers & schools — who need an affordable, scalable way to give every student tailored
+social-emotional support.
+What Makes It Different
+Trailhead sits at the intersection of academics + neuroscience + social-emotional learning.
+Competitors pick one lane: therapy-minded apps skip executive functioning and academics;
+academic apps ignore regulation and emotion. Trailhead treats the student as a whole picture,
+because that's how struggling actually works.
+“You're so real. You get it. I don't have to pretend.” — the words students use about
+Cat's classroom are the product's north star.
+Brand Voice (In Brief)
+• Safe, not soft. Warm but direct. Real over polished.
+• Non-hierarchical. Never lectures, never talks down, never clinical.
+• Honest about difficulty. Growth is uncomfortable; the app is a guide, not a magic wand.
+• Whole-person. A student is more than their grades.
+• Anti-money-grab. Transparent pricing, easy cancellation, no dark patterns — ever.
+Look & Feel
+Less ed-tech, more adventure guide. The visual direction is Patagonia-catalog: clean white
+backgrounds, generous breathing room, rounded cards, outdoor photography, mountain
+silhouettes, and topographic/map elements. The confirmed palette: Sunset Coral (#F9A971) and
+Bright Orange (#FB6526) as primary accents, Deep Sky Blue (#0165A5), Soft Lavender
+(#A68DEB), Rich Indigo (#3B2089), Charcoal Gray (#4A4A4A), and Golden Sand (#D0B280).
+Opening Trailhead should feel like opening a hiking journal, not a homework app.
+Business Model
+Freemium. A genuinely useful free tier (daily check-in with limits), an accessibly-priced paid tier
+(unlimited conversations, full dashboard tools, community), and a future school/institutional tier so
+districts can provide Trailhead to every student. It must be cheap, because the kids who need it
+most don't have money.
+Roadmap at a Glance
+• Phase 1 (30 days): Landing page live, auth, core Guidepost check-in with adaptive paths,
+mobile-first, download + referral incentive.
+• Phase 2 (90 days): Community containers for students, parents, and teachers with overlap
+spaces; chat history; dashboard tools.
+• Phase 3 (180 days): Tutor matching by personality, needs, and interests — the original vision,
+completed.
+Success Looks Like
+People using it. Feedback flowing. The beginnings of real community. And the moments that
+anchor everything: a student who says the work helped them see themselves clearly — or, as one
+student once wrote to Cat, that it saved their life.
+Trailhead • Product Brief • July 2026
