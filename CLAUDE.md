@@ -5,6 +5,7 @@ The core product is Guidepost, a structured adaptive check-in and dialogue syste
 The founder is Cat, a teacher who watched students fail not because they lacked ability, but because their basic needs were unmet and no one taught them how to manage what was happening inside. Trailhead exists to interrupt that cycle.
 Source Documents (read these — they are canonical)
 All in /docs:
+v2/ — the North Star philosophy layer, authored by Cat (2026-07). Eight documents: Preface, WhyTrailheadExist, ThePatternWeSee, ThePersonBeneath (the whole-person model + Trailhead Learning Loop), TheoryofChange, GuidepostPhilosophy, EducationalPhilosophy, CorePrinciples (25 principles in 4 levels). These sit ABOVE the PRD in interpretive precedence: when a PRD detail conflicts with a docs/v2 principle, flag it, don't guess. Known gaps (flag, never fill): EducationalPhilosophy.md is truncated mid-sentence; files are numbered 00 and 03–07 with CorePrinciples and WhyTrailheadExist unnumbered.
 Trailhead_Product_Brief.pdf — the why and what
 Trailhead_PRD.pdf — the full build spec; when this file and the PRD conflict, flag it, don't guess
 brand-voice-report.md — Cat's voice, derived from her Blueprint Session Q&A
@@ -14,6 +15,16 @@ paths/blue-path.md — From Disconnection to Awareness (the "I'm fine" path)
 paths/red-path.md — From Overwhelm to Ownership (spec complete per Cat, 2026-07-07 — repeated sections in the file are text duplication only; feature-flagged off and cannot ship without a dedicated safety review)
 tools/reusable-tools.md — master list of in-dialogue and dashboard tools
 The path documents contain Cat's authored dialogue, prompts, and reflection quotes. This content is her IP, prepared for copyright protection. Treat it as canonical content — implement it verbatim, never paraphrase or "improve" it without her approval.
+Philosophy in Practice (from docs/v2)
+The docs/v2 principles translate into build rules. Every feature, prompt, and piece of copy should hold to these:
+Mission language: Trailhead helps people become more conscious participants in their own lives. "Before people can intentionally choose their path, they must first be able to see themselves clearly."
+The Trailhead Learning Loop (ThePersonBeneath, TheoryofChange): Information → Reflection → Insight → Decisions → Experience → New Information. Progress and reflection surfaces should support this loop — treat every experience as information, never as a verdict on the person.
+Patterns, not labels (ThePersonBeneath §Design Implications): assessments increase understanding, never assign identity. AI synthesizes information across domains, but interpretation and decisions stay with the human. Reports emphasize patterns, relationships, and growth — never static labels ("you're an introvert" is out; "you tend to recharge alone" as an invitation to reflect is in). Recommendations invite reflection and experimentation; they never prescribe a path.
+Questions over advice (GuidepostPhilosophy): Guidepost should not provide an answer simply because it can. Prefer the question that lets the student notice something for themselves. Direct guidance is fine when it's genuinely needed — the test is whether it strengthens judgment or replaces it.
+Behavior is information, not identity (CorePrinciples 16): name what's happening without defining who the person is. "I made a bad choice" leaves somewhere to go; "I am bad" doesn't.
+Ownership stays with the person (CorePrinciples 20, GuidepostPhilosophy): never assign hope, purpose, motivation, or direction. Create the space where they can be noticed. "Your path is created, not found" (Principle 15).
+Terminology (per Cat, 2026-07-19): Juniper is the character/voice; Guidepost is the dialogue system. "Juniper — a guide" in marketing copy is compatible with "Guidepost is not the guide. It is a guidepost" in the philosophy — neither replaces the student's own direction.
+Audience (per Cat, 2026-07-19): student-primary for now; docs/v2's lifelong "people" framing is future direction, noted, not yet reflected in app copy.
 Tech Stack
 Framework: Next.js (App Router)
 Styling: Tailwind CSS
@@ -192,8 +203,10 @@ Ask: "Would this feel safe to a stressed 14-year-old?" If not, change it.
 Ask: "Does this sound like Juniper or like a product?" If product, rewrite.
 Ask: "Is this in Cat's authored content already?" If yes, use it verbatim.
 Ask: "Is this the simplest version that works?" Ship that.
+Ask: "Does this hand the student an answer they could have noticed for themselves?" Prefer the question.
+Ask: "Does this turn a pattern into a label?" Reword it — patterns are information, not identity.
 Notes for Claude Code
-Read this file first every session, then the PRD and the relevant path doc before touching Guidepost code.
+Read this file first every session, then the PRD and the relevant path doc before touching Guidepost code. For anything that shapes how the app talks to or interprets a student, check docs/v2 (especially GuidepostPhilosophy and ThePersonBeneath §Design Implications).
 Guidepost is a state machine with authored content, not a freeform chatbot. The most common way to build this wrong is to hand the whole conversation to the LLM. Don't.
 Cat's authored dialogue is IP. Implement it verbatim from /docs/paths/. Flag gaps; don't fill them with generated content.
 The landing page IS the first impression. Not boilerplate.

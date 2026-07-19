@@ -11,6 +11,12 @@ import type { Dimension } from "@/content/quiz/big-five";
  *
  * Hard rule from the PRD: the profile informs tone; it never boxes the user
  * in or appears as a label ("you're an introvert") in dialogue.
+ *
+ * Hard rule from docs/v2 (ThePersonBeneath §Design Implications): if scores
+ * are ever surfaced to the user, they must be framed as patterns and
+ * tendencies — information to reflect on, never identity or destiny. Reports
+ * emphasize patterns, relationships, and growth; interpretation stays with
+ * the student.
  */
 export type QuizAnswers = Record<string, "A" | "B" | "C">;
 
