@@ -5,15 +5,22 @@ The core product is Guidepost, a structured adaptive check-in and dialogue syste
 The founder is Cat, a teacher who watched students fail not because they lacked ability, but because their basic needs were unmet and no one taught them how to manage what was happening inside. Trailhead exists to interrupt that cycle.
 Source Documents (read these — they are canonical)
 All in /docs:
-v2/ — the North Star philosophy layer, authored by Cat (2026-07). Eight documents: Preface, WhyTrailheadExist, ThePatternWeSee, ThePersonBeneath (the whole-person model + Trailhead Learning Loop), TheoryofChange, GuidepostPhilosophy, EducationalPhilosophy, CorePrinciples (25 principles in 4 levels). These sit ABOVE the PRD in interpretive precedence: when a PRD detail conflicts with a docs/v2 principle, flag it, don't guess. Known gaps (flag, never fill): EducationalPhilosophy.md is truncated mid-sentence; files are numbered 00 and 03–07 with CorePrinciples and WhyTrailheadExist unnumbered.
-Trailhead_Product_Brief.pdf — the why and what
-Trailhead_PRD.pdf — the full build spec; when this file and the PRD conflict, flag it, don't guess
-brand-voice-report.md — Cat's voice, derived from her Blueprint Session Q&A
+v2/ — the North Star philosophy layer, authored by Cat (2026-07). Eight documents: Preface, WhyTrailheadExist, ThePatternWeSee, ThePersonBeneath (the whole-person model + Trailhead Learning Loop), TheoryofChange, GuidepostPhilosophy, EducationalPhilosophy, CorePrinciples (25 principles in 4 levels). These sit ABOVE the PRD in interpretive precedence: when a PRD detail conflicts with a docs/v2 principle, flag it, don't guess. Known gaps (flag, never fill): EducationalPhilosophy.md is truncated mid-sentence ("…help-seeking, decision-making, and th"); numbering lives in each file's H1 title, not the filename — 00 (Preface) and 03–07, with CorePrinciples and WhyTrailheadExist unnumbered and no 01 or 02 anywhere (the sequence jumps 00 → 03).
+Trailhead_Product_Brief.txt — the why and what
+Trailhead_PRD.txt — the full build spec; when the Brief and the PRD conflict, flag it, don't guess
+brand/cats-blueprint-qa.md — Cat's voice source: her Blueprint Session Q&A (Steady Build, 2026-07-06); the Brand Voice section below derives from it
 paths/green-path.md — From Intention to Alignment (full dialogue flow, tone cheat sheet, storyboard)
 paths/yellow-path.md — From Stuck to Steady (five adaptive branches)
 paths/blue-path.md — From Disconnection to Awareness (the "I'm fine" path)
 paths/red-path.md — From Overwhelm to Ownership (spec complete per Cat, 2026-07-07 — repeated sections in the file are text duplication only; feature-flagged off and cannot ship without a dedicated safety review)
 tools/reusable-tools.md — master list of in-dialogue and dashboard tools
+Working documents (also in /docs, supporting — not canonical):
+Trailhead_Buildmap.md — the running build map/status ledger
+SETUP.md · security.md — environment setup and security posture notes
+onboarding/big-five-quiz.md — Cat's authored onboarding quiz scenarios (her IP, same verbatim rule as the paths)
+content-review/ — needsCat packets awaiting Cat's decisions, including v2-alignment-for-cat.md (open flags F-V1 truncated EducationalPhilosophy, F-V2 numbering, F-V3 "Discover Your Path" quiz title vs Principle 15)
+safety/red-path-review.md — the dedicated Red Path safety review & release gate (status: NOT APPROVED)
+plans/ · research/chatbot-notes.md — working plans and research notes
 The path documents contain Cat's authored dialogue, prompts, and reflection quotes. This content is her IP, prepared for copyright protection. Treat it as canonical content — implement it verbatim, never paraphrase or "improve" it without her approval.
 Philosophy in Practice (from docs/v2)
 The docs/v2 principles translate into build rules. Every feature, prompt, and piece of copy should hold to these:
@@ -22,7 +29,8 @@ The Trailhead Learning Loop (ThePersonBeneath, TheoryofChange): Information → 
 Patterns, not labels (ThePersonBeneath §Design Implications): assessments increase understanding, never assign identity. AI synthesizes information across domains, but interpretation and decisions stay with the human. Reports emphasize patterns, relationships, and growth — never static labels ("you're an introvert" is out; "you tend to recharge alone" as an invitation to reflect is in). Recommendations invite reflection and experimentation; they never prescribe a path.
 Questions over advice (GuidepostPhilosophy): Guidepost should not provide an answer simply because it can. Prefer the question that lets the student notice something for themselves. Direct guidance is fine when it's genuinely needed — the test is whether it strengthens judgment or replaces it.
 Behavior is information, not identity (CorePrinciples 16): name what's happening without defining who the person is. "I made a bad choice" leaves somewhere to go; "I am bad" doesn't.
-Ownership stays with the person (CorePrinciples 20, GuidepostPhilosophy): never assign hope, purpose, motivation, or direction. Create the space where they can be noticed. "Your path is created, not found" (Principle 15).
+Ownership stays with the person (CorePrinciples 20, GuidepostPhilosophy): never assign hope, purpose, identity, motivation, or direction. Create the space where they can be noticed. "Your path is created, not found" (Principle 15).
+Agency over dependence (CorePrinciples 21, 22): "Technology should increase human agency, not dependence" — every interaction should leave users more capable of living their lives without the technology than before — and "AI should amplify human wisdom, not replace human judgment." Build for graduation, not engagement; no feature should make the student need the app more.
 Terminology (per Cat, 2026-07-19): Juniper is the character/voice; Guidepost is the dialogue system. "Juniper — a guide" in marketing copy is compatible with "Guidepost is not the guide. It is a guidepost" in the philosophy — neither replaces the student's own direction.
 Audience (per Cat, 2026-07-19): student-primary for now; docs/v2's lifelong "people" framing is future direction, noted, not yet reflected in app copy.
 Tech Stack
@@ -89,7 +97,7 @@ Says "I'm fine"; flat, autopilot, masking
 Phase 2
 Red — From Overwhelm to Ownership
 Is carrying something heavy
-Phase 2 — spec complete; feature-flagged, blocked on safety review
+Phase 2 — spec complete; feature-flagged, blocked on safety review (docs/safety/red-path-review.md)
 
 Paths are permeable: Blue Stage 3 routes to Yellow (head full), Red (heart loud), or stays Blue. Implement the fallback logic exactly as specified in the path docs ("I don't know" flips the prompt; "nothing sounds right" offers a micro-reset; still stuck re-anchors to Weekly Horizon).
 Juniper's tone system
@@ -149,7 +157,7 @@ Depth-of-water monitoring: detect crisis signals (self-harm, abuse, immediate da
 Clear boundaries: "I'm not a counselor, but here's someone who can help." Never diagnose. Never prescribe. Never attempt therapy for acute crises.
 Vulnerability safeguards: pathways cap reflective depth; Blue/Red flows always offer grounding exits.
 No identifiable logging in safety telemetry. No behavioral ad tracking. No data sale, ever.
-The Red Path cannot ship without a dedicated safety review.
+The Red Path cannot ship without a dedicated safety review. The review and release gate live in docs/safety/red-path-review.md (status: NOT APPROVED); the gate is enforced in code — lib/flags.ts requires both FF_RED_PATH and RED_PATH_RELEASE_APPROVED, and never set either in a committed env file, CI config, or Vercel environment.
 Auth & Data Model
 Supabase Auth: email/password + Google OAuth. Roles (student, parent, teacher) in a profiles table, not auth metadata.
 Assume minors: minimize data collection, COPPA/FERPA-aware posture, parental consent flow where required.
