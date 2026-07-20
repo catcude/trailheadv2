@@ -61,7 +61,11 @@ describe("hero taste content slice", () => {
       expect(out.messages.length).toBeGreaterThan(0);
       // Beat 2: every offered option must advance cleanly.
       for (const o of out.options ?? []) {
-        const next = advance(out.state, { type: "option", optionId: o.id }, ctx);
+        const next = advance(
+          out.state,
+          { type: "option", optionId: o.id },
+          ctx,
+        );
         expect(next.state.currentNodeId).toBeTruthy();
       }
     }
