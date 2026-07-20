@@ -157,6 +157,66 @@
         margin: 10px 0 26px 22px;
       }
 
+      /* Read-only explainer panel (Checkpoint 5 intro) — a calm read, not an
+         input, so it's visually distinct from the .q answer cards. */
+      .explainer {
+        background: linear-gradient(160deg, var(--paper-2), var(--paper));
+        border: 1px solid var(--line);
+        border-left: 4px solid var(--calm);
+        border-radius: 18px;
+        padding: 22px 24px 8px;
+        margin: 18px 0 26px;
+        box-shadow: var(--shadow);
+      }
+      .explainer .lead {
+        font-size: 0.98rem;
+        color: var(--depth);
+        margin: 0 0 16px;
+      }
+      .explainer h4 {
+        font-size: 0.98rem;
+        color: var(--depth);
+        margin: 20px 0 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .explainer p {
+        font-size: 0.92rem;
+        margin: 0 0 12px;
+      }
+      .explainer ul {
+        margin: 0 0 14px;
+        padding-left: 4px;
+        list-style: none;
+      }
+      .explainer li {
+        font-size: 0.92rem;
+        position: relative;
+        padding: 0 0 10px 26px;
+      }
+      .explainer li::before {
+        content: "›";
+        position: absolute;
+        left: 6px;
+        top: -1px;
+        color: var(--cta);
+        font-weight: 700;
+        font-size: 1.05rem;
+      }
+      .explainer li strong {
+        color: var(--depth);
+      }
+      .explainer .closer {
+        font-size: 0.92rem;
+        font-style: italic;
+        color: var(--depth);
+        background: rgba(166, 141, 235, 0.12);
+        border-radius: 10px;
+        padding: 11px 15px;
+        margin: 6px 0 14px;
+      }
+
       /* Question cards */
       .q {
         background: var(--paper);
@@ -332,6 +392,9 @@
         Before we push into the next stretch, there are a handful of forks in
         the path where your call decides the route. None are homework — a
         sentence each is plenty, and you can skip any that aren&apos;t ready.
+        We also gave the app a quiet tune-up while you were away — there&apos;s
+        a plain-English rundown at the last checkpoint, plus four tiny calls
+        that came out of it.
       </p>
       <p class="hero-note">
         Everything you type stays in this browser tab. When you&apos;re done,
@@ -533,6 +596,74 @@
             },
           ],
         },
+        {
+          icon: "🛠️",
+          title: "Checkpoint 5 — A quick tune-up",
+          sub: "What we did under the hood — and four tiny calls that came out of it",
+          intro:
+            '<p class="lead">While you were away we gave Trailhead a careful once-over — looking for anything slow, and any weak spots in how students’ information is protected. Here’s the whole thing in plain English. <strong>Nothing about how Juniper talks to a student changed, and not one of your words was touched.</strong></p>' +
+            "<h4>✅ The bottom line</h4>" +
+            "<p>The app was already in good shape and genuinely safe. We didn’t find anything alarming. We made it noticeably <strong>faster to load</strong>, and we <strong>locked a few extra doors</strong> that were already mostly closed.</p>" +
+            "<h4>⚡ We made it faster</h4>" +
+            "<ul>" +
+            "<li><strong>The dashboard asks for everything at once.</strong> Before, it fetched habits, streaks, and aha moments one at a time — ask, wait, ask, wait. Now it asks for them all together and waits once, so the page a student sees first shows up about twice as fast.</li>" +
+            "<li><strong>The homepage stopped carrying luggage it doesn’t need.</strong> Every visitor’s browser was quietly downloading the entire check-in script for all four paths — including the not-yet-released Red and Blue ones. Now it downloads only the small piece it actually uses. Lighter page, and the unreleased content stays private until you and the safety review say otherwise.</li>" +
+            "<li><strong>Juniper “types” now.</strong> Replies used to pause and then appear all at once in a block. Now the words arrive as they’re written, like a real person messaging you. It reads calmer — and there’s a question below asking how it feels to you.</li>" +
+            "<li><strong>Check-in tools load only when needed.</strong> The eight little tools (mood picker, Covey sorter, mini-reset…) used to all load up front; now each loads the moment it’s actually used.</li>" +
+            "</ul>" +
+            "<h4>🔐 We locked a few extra doors</h4>" +
+            "<p>None of these were open holes — think of each as a <em>second</em> lock on a door that already had a good one. That’s the responsible way to protect kids’ data: never rely on a single thing.</p>" +
+            "<ul>" +
+            "<li><strong>A second ID check on a student’s own data</strong>, so if the first protection ever slipped, the second still holds. Their private dialogue stays theirs, full stop.</li>" +
+            "<li><strong>A stricter rule</strong> about what code is allowed to run on the logged-in pages (where real student words appear) — a standard guard against a nasty class of attack.</li>" +
+            "<li><strong>Turning away requests that didn’t come from us</strong>, so another website can’t act on a student’s behalf without them knowing.</li>" +
+            "<li><strong>Gentle speed bumps</strong> on a couple of buttons so nobody can hammer them — high enough that a normal student never notices.</li>" +
+            "<li><strong>The payment page no longer trusts an address it’s handed</strong> — the “back” link is one we set ourselves.</li>" +
+            "</ul>" +
+            '<p class="closer">In one sentence: the app is faster and a little better protected, none of your content or Juniper’s voice changed, and the only thing a student will feel is a smoother, more natural check-in.</p>' +
+            "<p style=\"font-size:0.86rem;color:rgba(74,74,74,0.7);margin-bottom:6px\">One item that came up — the 13+ / consent question for minors — is already captured up in Checkpoint 4 (“Anything region-specific…”), so it’s not repeated here. The four below are the only new calls.</p>",
+          questions: [
+            {
+              id: "ai-data-terms",
+              tag: "Decision · OQ1",
+              priority: true,
+              title:
+                "When the AI is switched on, is it okay that a student's typed words go to it?",
+              why: "This is the data-handling half of the AI question in Checkpoint 1. When a real AI key is turned on, three features send a student's own typed words to the AI provider (to sort a brain-dump, to explain a plan change, and an optional extra safety check). Nothing is stored on our side and the student isn't identified to the provider — but our users are assumed to be minors, so this deserves your explicit yes, not a default. With no AI key, nothing is ever sent.",
+              assumption:
+                "Our recommendation: yes, but only under written terms where the provider never trains on the text and deletes it after processing — and with a plain line on the privacy page. If you'd rather not, we run the interpretation-free version (it already works without a key).",
+              placeholder:
+                "e.g. 'Yes, under those terms' + one sentence in your voice for the privacy page — or 'no, keep it AI-free for now.'",
+            },
+            {
+              id: "crisis-coverage",
+              tag: "Decision · safety",
+              title:
+                "How hard should we look for crisis language in what a student writes?",
+              why: "Every typed message is checked against a word/phrase list before anything else runs — that's the floor and it can't be turned off, but it's English-only and catches direct phrasing. There's an optional second layer (the AI from the question above) that can also catch paraphrased or indirect signals the list misses. It can only ever ADD a catch, never remove one. It's currently off.",
+              assumption:
+                "Our recommendation: turn the second layer on once the AI question above is settled — it only ever errs toward showing someone the crisis resources.",
+              placeholder:
+                "e.g. 'Turn it on.' And: do you have students who write in a language other than English? (If so, we'll plan a non-English word list with the safety review.)",
+            },
+            {
+              id: "typing-feel",
+              tag: "Your read",
+              title: "Does Juniper's new 'typing' feel steady, or hurried?",
+              why: "Juniper's replies now appear word by word as they arrive, instead of popping in all at once. We think it reads calmer and more human — but pace and tone are yours. If it feels rushed, we can slow it down or go back to whole-line arrival with one small change.",
+              placeholder:
+                "Try a check-in and tell us how it feels — 'steady, keep it', 'a touch slower', or 'go back to all-at-once.'",
+            },
+            {
+              id: "streak-cap",
+              tag: "Tiny call",
+              title: "If a habit streak passes a year, how should it read?",
+              why: "To keep the dashboard fast for long-time students, we now load a year of habit history. A streak longer than 366 days would show as 366. It's a lovely problem to have and nobody's there yet — we just want your instinct for the wording if they get there.",
+              placeholder:
+                "e.g. '365+ days', a little celebration, or 'the plain number is fine.'",
+            },
+          ],
+        },
       ];
 
       const POINTER =
@@ -558,6 +689,16 @@
         const hr = document.createElement("hr");
         hr.className = "trail-line";
         form.appendChild(hr);
+
+        // Optional read-only intro (trusted, authored HTML — not user input),
+        // rendered before the checkpoint's question cards. On-screen only; it
+        // carries no answer, so it never enters the Markdown export.
+        if (cp.intro) {
+          const intro = document.createElement("div");
+          intro.className = "explainer";
+          intro.innerHTML = cp.intro;
+          form.appendChild(intro);
+        }
 
         cp.questions.forEach((q) => {
           totalQuestions++;
