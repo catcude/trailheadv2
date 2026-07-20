@@ -2,23 +2,75 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import {
   FALLBACK_LABELS,
   type CheckinStateFrame,
-} from "@/lib/guidepost/api-schema";
+} from "@/lib/guidepost/api-types";
 import { Button } from "@/components/ui/button";
 import { TipBox } from "@/components/ui/tip-box";
-import {
-  CoveyQuadrantSorter,
-  type CoveySorterResult,
-} from "@/components/tools/covey-quadrant-sorter";
-import { MiniResetToolkit } from "@/components/tools/mini-reset-toolkit";
-import { StartSmallPlanner } from "@/components/tools/start-small-planner";
-import { MicroNeedsMenu } from "@/components/tools/micro-needs-menu";
-import { GentleFocusAnchor } from "@/components/tools/gentle-focus-anchor";
-import { MoodMatchingVisual } from "@/components/tools/mood-matching-visual";
-import { EveningWindDown } from "@/components/tools/evening-wind-down";
-import { AhaTracker } from "@/components/tools/aha-tracker";
+import type { CoveySorterResult } from "@/components/tools/covey-quadrant-sorter";
+
+// Tools load when their node is reached — only one ever shows per frame, so
+// none of them belong in the initial check-in chunk (2026-07-20 audit, B2).
+// The loading state is the same quiet ellipsis as a pending turn: no spinner
+// flash, no time pressure.
+const toolLoading = () => (
+  <p className="text-sm text-ink/50" role="status">
+    …
+  </p>
+);
+const CoveyQuadrantSorter = dynamic(
+  () =>
+    import("@/components/tools/covey-quadrant-sorter").then(
+      (m) => m.CoveyQuadrantSorter,
+    ),
+  { loading: toolLoading },
+);
+const MiniResetToolkit = dynamic(
+  () =>
+    import("@/components/tools/mini-reset-toolkit").then(
+      (m) => m.MiniResetToolkit,
+    ),
+  { loading: toolLoading },
+);
+const StartSmallPlanner = dynamic(
+  () =>
+    import("@/components/tools/start-small-planner").then(
+      (m) => m.StartSmallPlanner,
+    ),
+  { loading: toolLoading },
+);
+const MicroNeedsMenu = dynamic(
+  () =>
+    import("@/components/tools/micro-needs-menu").then((m) => m.MicroNeedsMenu),
+  { loading: toolLoading },
+);
+const GentleFocusAnchor = dynamic(
+  () =>
+    import("@/components/tools/gentle-focus-anchor").then(
+      (m) => m.GentleFocusAnchor,
+    ),
+  { loading: toolLoading },
+);
+const MoodMatchingVisual = dynamic(
+  () =>
+    import("@/components/tools/mood-matching-visual").then(
+      (m) => m.MoodMatchingVisual,
+    ),
+  { loading: toolLoading },
+);
+const EveningWindDown = dynamic(
+  () =>
+    import("@/components/tools/evening-wind-down").then(
+      (m) => m.EveningWindDown,
+    ),
+  { loading: toolLoading },
+);
+const AhaTracker = dynamic(
+  () => import("@/components/tools/aha-tracker").then((m) => m.AhaTracker),
+  { loading: toolLoading },
+);
 
 interface Bubble {
   role: "juniper" | "user";
@@ -53,6 +105,8 @@ export function CheckinClient({
   const [atRouter, setAtRouter] = useState(true);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /** Juniper's line currently arriving over SSE, rendered as it streams. */
+  const [streaming, setStreaming] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
   const [horizon, setHorizon] = useState<string[] | null>(null);
   const [resumeOffer, setResumeOffer] = useState<boolean>(
@@ -62,7 +116,7 @@ export function CheckinClient({
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ block: "end" });
-  }, [bubbles, frame, pending]);
+  }, [bubbles, frame, pending, streaming]);
 
   async function send(
     input: Record<string, unknown>,
@@ -109,6 +163,7 @@ export function CheckinClient({
           setBubbles((prev) => [...prev, { role: "juniper", text }]);
         }
         currentText = null;
+        setStreaming(null);
       };
 
       for (;;) {
@@ -128,7 +183,10 @@ export function CheckinClient({
               currentText = "";
               break;
             case "token":
+              // Render tokens as they arrive — the line grows in place and
+              // settles into a bubble on flush (2026-07-20 audit, C1).
               currentText = (currentText ?? "") + (data.text as string);
+              setStreaming(currentText);
               break;
             case "state":
               flushMessage();
@@ -139,6 +197,7 @@ export function CheckinClient({
       }
       flushMessage();
     } catch {
+      setStreaming(null);
       setError("Lost the connection for a second. Try again?");
     }
     setPending(false);
@@ -183,7 +242,12 @@ export function CheckinClient({
             </div>
           ),
         )}
-        {pending ? (
+        {streaming !== null ? (
+          <div className="max-w-[85%] self-start rounded-[var(--radius-card)] rounded-bl-md border border-sand/40 bg-white p-4 shadow-[var(--shadow-card)]">
+            <p className="text-sm whitespace-pre-line">{streaming}</p>
+          </div>
+        ) : null}
+        {pending && streaming === null ? (
           <p className="text-sm text-ink/50" role="status">
             …
           </p>

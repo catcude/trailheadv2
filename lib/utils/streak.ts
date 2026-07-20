@@ -30,3 +30,21 @@ export function computeStreak(
 function iso(d: Date): string {
   return d.toISOString().slice(0, 10);
 }
+
+/**
+ * How much check history the dashboard loads per habit. 366 days keeps
+ * streaks exact up to a full year; a streak longer than the window displays
+ * as the window length (a cap, never a reset — gentle-reset spirit holds).
+ * Bounding the fetch keeps the dashboard's row set flat as users accumulate
+ * history instead of growing without limit.
+ */
+export const STREAK_WINDOW_DAYS = 366;
+
+/** First day (YYYY-MM-DD) of the streak window ending at `today`. */
+export function streakWindowStart(
+  today: string = new Date().toISOString().slice(0, 10),
+): string {
+  const d = new Date(`${today}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() - STREAK_WINDOW_DAYS);
+  return iso(d);
+}

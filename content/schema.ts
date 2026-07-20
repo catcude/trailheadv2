@@ -1,4 +1,9 @@
 import { z } from "zod";
+import { PATH_IDS, RETURN_TARGET, type PathId } from "./targets";
+
+// Runtime helpers that must stay zod-free for client bundles live in
+// ./targets; re-exported here so existing imports keep working.
+export { PATH_IDS, RETURN_TARGET, parseShiftTarget } from "./targets";
 
 /**
  * Guidepost content schema — the hybrid content model's data half.
@@ -12,8 +17,8 @@ import { z } from "zod";
  * and surfaced in docs/content-review/ for her approval.
  */
 
-export const PathIdSchema = z.enum(["green", "yellow", "blue", "red"]);
-export type PathId = z.infer<typeof PathIdSchema>;
+export const PathIdSchema = z.enum(PATH_IDS);
+export type { PathId };
 
 export const StageSchema = z.number().int().min(1).max(6);
 
@@ -79,27 +84,6 @@ export const TipSchema = z.object({
   needsCat: z.boolean().optional(),
 });
 export type Tip = z.infer<typeof TipSchema>;
-
-/** Target sentinel: return to the node that triggered a fallback detour. */
-export const RETURN_TARGET = "@return";
-
-/**
- * A cross-path shift target is written "<path>:<nodeId>" (e.g. "yellow:s1").
- * Returns the parsed path + node when the string is a well-formed shift target
- * for a known path, else null (ordinary same-path targets and "@return").
- * The state machine uses this to hand a permeability shift back to the route;
- * only the route (never the LLM) then swaps the active path.
- */
-export function parseShiftTarget(
-  target: string,
-): { path: PathId; nodeId: string } | null {
-  const idx = target.indexOf(":");
-  if (idx <= 0) return null;
-  const parsed = PathIdSchema.safeParse(target.slice(0, idx));
-  const nodeId = target.slice(idx + 1);
-  if (!parsed.success || !nodeId) return null;
-  return { path: parsed.data, nodeId };
-}
 
 const NodeBase = z.object({
   id: z.string().min(1),

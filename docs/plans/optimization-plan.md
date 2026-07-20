@@ -6,6 +6,29 @@ value-per-risk: A and B are safe to ship independently; C needs a deliberate
 product/engineering call; D is the security-hardening backlog; the last
 section is decisions that belong to Cat, not code.
 
+## Status — implemented 2026-07-20
+
+Phases A–D shipped, with these deliberate deviations:
+
+- **A6:** window = **366 days** (exact streaks up to a year; longer displays
+  capped — see `lib/utils/streak.ts` and question #4 in
+  `docs/content-review/audit-questions-for-cat.md`).
+- **B1:** implemented as a server-built pruned slice
+  (`content/marketing/hero-slice.ts`) passed to the hero as props — the
+  public bundle now carries **no** path content at all (verified against the
+  built chunks). The zod-free split went further than planned: machine
+  runtime helpers moved to `content/targets.ts`, so zod is out of every
+  client chunk, not just the check-in's.
+- **C1 shipped; C2 deferred** pending real first-token latency measurements
+  under a live provider, as recommended below.
+- **D1 scoped:** nonce + `strict-dynamic` CSP applies to the **authenticated
+  surface** (always dynamically rendered — and where student text renders);
+  the public/static surface keeps `'unsafe-inline'` because prerendered pages
+  cannot carry a per-request nonce. Documented residual in `lib/utils/csp.ts`
+  and `docs/security.md`.
+- **Decisions for Cat** are packaged as
+  `docs/content-review/audit-questions-for-cat.md`.
+
 Every item names its finding, the fix, effort, and risk. Nothing here touches
 Cat's authored content (the content-integrity lock stays byte-identical).
 

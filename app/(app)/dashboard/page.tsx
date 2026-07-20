@@ -7,7 +7,7 @@ import { signOut } from "@/app/auth/actions";
 import { HabitList, type HabitView } from "@/components/dashboard/habit-list";
 import { AhaLog, type AhaView } from "@/components/dashboard/aha-log";
 import { WeeklyHorizonEditor } from "@/components/dashboard/weekly-horizon-editor";
-import { computeStreak } from "@/lib/utils/streak";
+import { computeStreak, streakWindowStart } from "@/lib/utils/streak";
 import { currentWeekStart } from "@/lib/utils/week";
 import { getFlags } from "@/lib/flags";
 import {
@@ -29,28 +29,78 @@ export default async function DashboardPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/auth/sign-in");
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role, display_name")
-    .eq("id", user.id)
-    .single();
+  // Two waves instead of a chain: profile + habits need only the user;
+  // everything else runs in parallel once the habit ids are known. Explicit
+  // user_id filters everywhere — RLS enforces ownership, this is the second
+  // layer (defense in depth, 2026-07-20 audit).
+  const [{ data: profile }, { data: habitRows }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("role, display_name")
+      .eq("id", user.id)
+      .single(),
+    supabase
+      .from("habits")
+      .select("id, title")
+      .eq("user_id", user.id)
+      .is("archived_at", null)
+      .order("created_at", { ascending: true }),
+  ]);
   if (!profile?.role || !profile?.display_name) redirect("/onboarding");
 
-  // Habits + their checks → today's state + streak.
-  const { data: habitRows } = await supabase
-    .from("habits")
-    .select("id, title")
-    .is("archived_at", null)
-    .order("created_at", { ascending: true });
   const habitIds = (habitRows ?? []).map((h) => h.id);
-  const { data: checkRows } = habitIds.length
-    ? await supabase
-        .from("habit_checks")
-        .select("habit_id, checked_on")
-        .in("habit_id", habitIds)
-    : { data: [] as { habit_id: string; checked_on: string }[] };
-
   const today = new Date().toISOString().slice(0, 10);
+  const flags = getFlags();
+
+  const emptyChecks = {
+    data: [] as { habit_id: string; checked_on: string }[],
+  };
+  const [
+    { data: checkRows },
+    { data: ahaRows },
+    { data: horizon },
+    { data: goalRows },
+    { data: reflectionRows },
+  ] = await Promise.all([
+    // Checks bounded to the streak window: enough history for an exact
+    // streak up to a year (beyond that the number caps at the window), so
+    // the row set stays flat instead of growing with tenure.
+    habitIds.length
+      ? supabase
+          .from("habit_checks")
+          .select("habit_id, checked_on")
+          .in("habit_id", habitIds)
+          .gte("checked_on", streakWindowStart(today))
+      : Promise.resolve(emptyChecks),
+    supabase
+      .from("aha_moments")
+      .select("id, text, tag, created_at")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(20),
+    supabase
+      .from("weekly_horizons")
+      .select("intentions")
+      .eq("user_id", user.id)
+      .eq("week_start", currentWeekStart())
+      .maybeSingle(),
+    flags.dashboardExtras
+      ? supabase
+          .from("goals")
+          .select("id, horizon, title, status")
+          .eq("user_id", user.id)
+          .not("status", "in", "(dropped)")
+          .order("created_at", { ascending: true })
+      : Promise.resolve({ data: [] as GoalView[] }),
+    supabase
+      .from("reflections")
+      .select("id, quote_text, created_at")
+      .eq("user_id", user.id)
+      .not("quote_text", "is", null)
+      .order("created_at", { ascending: false })
+      .limit(10),
+  ]);
+
   const checksByHabit = new Map<string, string[]>();
   for (const c of checkRows ?? []) {
     const list = checksByHabit.get(c.habit_id) ?? [];
@@ -67,11 +117,6 @@ export default async function DashboardPage() {
     };
   });
 
-  const { data: ahaRows } = await supabase
-    .from("aha_moments")
-    .select("id, text, tag, created_at")
-    .order("created_at", { ascending: false })
-    .limit(20);
   const ahas: AhaView[] = (ahaRows ?? []).map((a) => ({
     id: a.id,
     text: a.text,
@@ -79,32 +124,11 @@ export default async function DashboardPage() {
     createdAt: a.created_at,
   }));
 
-  const { data: horizon } = await supabase
-    .from("weekly_horizons")
-    .select("intentions")
-    .eq("week_start", currentWeekStart())
-    .maybeSingle();
   const intentions = Array.isArray(horizon?.intentions)
     ? (horizon.intentions as string[])
     : [];
 
-  const flags = getFlags();
-  let goals: GoalView[] = [];
-  if (flags.dashboardExtras) {
-    const { data: goalRows } = await supabase
-      .from("goals")
-      .select("id, horizon, title, status")
-      .not("status", "in", "(dropped)")
-      .order("created_at", { ascending: true });
-    goals = (goalRows ?? []) as GoalView[];
-  }
-
-  const { data: reflectionRows } = await supabase
-    .from("reflections")
-    .select("id, quote_text, created_at")
-    .not("quote_text", "is", null)
-    .order("created_at", { ascending: false })
-    .limit(10);
+  const goals: GoalView[] = (goalRows ?? []) as GoalView[];
 
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 p-6">

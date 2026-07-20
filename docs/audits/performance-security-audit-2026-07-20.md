@@ -6,7 +6,10 @@ billing, client bundles, server-component data fetching, database indexes,
 caching/rendering config, and security headers. Every finding below was
 verified against source; file:line references are as of this commit.
 
-Companion remediation plan: `docs/plans/optimization-plan.md`.
+Companion remediation plan: `docs/plans/optimization-plan.md` — **implemented
+2026-07-20** (see its Status section for what shipped and the deliberate
+deviations). Decisions the audit routed to Cat live in
+`docs/content-review/audit-questions-for-cat.md`.
 Living checklist updated alongside this audit: `docs/security.md`.
 
 ---

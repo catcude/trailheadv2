@@ -1,10 +1,11 @@
-import {
-  RETURN_TARGET,
-  parseShiftTarget,
-  type ContentNode,
-  type PathContent,
-  type PathId,
-  type QuoteBank,
+// Runtime imports come from the zod-free targets module — this file reaches
+// client bundles (hero taste) and must not drag zod in. Types are erased.
+import { RETURN_TARGET, parseShiftTarget } from "@/content/targets";
+import type {
+  ContentNode,
+  PathContent,
+  PathId,
+  QuoteBank,
 } from "@/content/schema";
 import type { CheckinVariant } from "@/lib/utils/time";
 import {

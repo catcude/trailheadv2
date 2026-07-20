@@ -17,8 +17,9 @@ same PR as any security-relevant change.
 | Server-only secrets never `NEXT_PUBLIC_` | ✅ | `.env.example` |
 | Dependency audit + Dependabot | ✅ | `.github/workflows/ci.yml`, `.github/dependabot.yml` |
 | Security headers (CSP, HSTS, XFO DENY, Referrer-Policy, Permissions-Policy) | ✅ | `next.config.ts` |
-| Nonce-based CSP (drop `unsafe-inline`) | ⬜ backlog | `next.config.ts` |
-| Rate limiting on `/api/checkin` | ✅ Postgres `check_rate_limit()` RPC (security definer; authenticated-only; counters table locked by policy-less RLS) + in-memory per-IP layer | migration 0002, `lib/utils/rate-limit.ts` |
+| Nonce-based CSP (drop `unsafe-inline`) | ✅ authenticated surface: per-request nonce + `strict-dynamic` via middleware. Residual: public/static pages keep `'unsafe-inline'` (prerendered pages can't carry a nonce; no user content renders there) | `middleware.ts`, `lib/utils/csp.ts` |
+| Rate limiting on `/api/checkin` | ✅ Postgres `check_rate_limit()` RPC (security definer; authenticated-only; counters table locked by policy-less RLS) + in-memory per-IP layer; `close` + `weekly-horizon` now limited too (generous abuse ceilings) | migration 0002, `lib/utils/rate-limit.ts` |
+| Origin check on state-changing API routes (CSRF backstop beyond SameSite=Lax) | ✅ | `lib/utils/origin-check.ts` |
 | Stripe webhook signature verification | ✅ raw body verified before processing; missing secret → 503, missing signature → 400; idempotent handler; service-role writes confined to this path | `app/api/webhooks/stripe/route.ts`, `lib/billing/webhook.ts` |
 | LLM data hygiene (session context only; no-training terms) | ⬜ OQ1 — code confines context, but no-training/DPA terms undecided; student free text reaches the provider in three flows (see 2026-07-20 audit, MED finding) | `lib/llm/provider.ts`, `lib/llm/interpret.ts` |
 | Branch protection on `main` with required CI checks | ⬜ repo setting — see `docs/SETUP.md` | GitHub |

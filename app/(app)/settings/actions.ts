@@ -9,6 +9,11 @@ import {
 } from "@/lib/billing/stripe";
 
 async function origin(): Promise<string> {
+  // Configured site URL first (2026-07-20 audit, D4) — Stripe redirect
+  // targets shouldn't be steerable by request headers. Header fallback keeps
+  // local/preview environments working without the env var.
+  const configured = process.env.NEXT_PUBLIC_SITE_URL;
+  if (configured) return configured.replace(/\/$/, "");
   const h = await headers();
   const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
   const proto = h.get("x-forwarded-proto") ?? "https";

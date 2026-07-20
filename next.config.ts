@@ -2,35 +2,14 @@ import type { NextConfig } from "next";
 
 /*
  * Security headers (scaffolding plan §5). No third-party scripts exist by
- * design — no analytics, no trackers. When Stripe checkout lands (M2), add
- * js.stripe.com to script-src/frame-src deliberately, nothing else.
- * 'unsafe-inline' is required by Next.js inline runtime scripts/styles;
- * tightening to nonce-based CSP is tracked in docs/security.md.
+ * design — no analytics, no trackers.
+ *
+ * Content-Security-Policy is NOT set here: it's assembled per request in
+ * middleware (lib/utils/csp.ts) so the authenticated surface gets a
+ * nonce-based script-src while the static/public surface keeps the
+ * inline-allowing policy prerendered pages require (2026-07-20 audit, D1).
  */
-// React needs eval() for dev-mode debugging only; production stays strict.
-// Stripe checkout/portal are full-page redirects; js.stripe.com is allowed in
-// script-src/frame-src for Stripe.js (deliberate, nothing else — see §5).
-const scriptSrc =
-  process.env.NODE_ENV === "development"
-    ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com"
-    : "script-src 'self' 'unsafe-inline' https://js.stripe.com";
-
-const CSP = [
-  "default-src 'self'",
-  scriptSrc,
-  "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob:",
-  "font-src 'self'",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com",
-  "frame-src 'self' https://js.stripe.com",
-  "frame-ancestors 'none'",
-  "base-uri 'self'",
-  "form-action 'self'",
-  "object-src 'none'",
-].join("; ");
-
 const securityHeaders = [
-  { key: "Content-Security-Policy", value: CSP },
   {
     key: "Strict-Transport-Security",
     value: "max-age=63072000; includeSubDomains; preload",
