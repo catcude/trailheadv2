@@ -25,7 +25,16 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   async headers() {
-    return [{ source: "/(.*)", headers: securityHeaders }];
+    return [
+      { source: "/(.*)", headers: securityHeaders },
+      // The questions-for-Cat page is served publicly but is an internal
+      // working doc — keep crawlers out (belt-and-suspenders with the page's
+      // own <meta name="robots"> tag).
+      {
+        source: "/questions-for-cat.html",
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+      },
+    ];
   },
 };
 
