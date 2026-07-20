@@ -24,29 +24,7 @@ export const CheckinBodySchema = z.object({
 
 export type CheckinBody = z.infer<typeof CheckinBodySchema>;
 
-/** Fallback trigger labels shown as user messages (drafts, needsCat). */
-export const FALLBACK_LABELS: Record<string, string> = {
-  idk: "I don’t know",
-  nothingSoundsRight: "Nothing sounds right",
-  stillStuck: "Still stuck",
-};
-
-/** The terminal SSE `state` frame /api/checkin sends after each turn. */
-export interface CheckinStateFrame {
-  sessionId: string;
-  nodeId: string;
-  stage: number;
-  toneTag: string;
-  options: { id: string; label: string }[] | null;
-  tool: { type: string; props?: Record<string, unknown> } | null;
-  quotes: string[] | null;
-  tip: {
-    title?: string;
-    body?: string;
-    gapRef?: string;
-  } | null;
-  fallbacks: ("idk" | "nothingSoundsRight" | "stillStuck")[] | null;
-  freeText: boolean;
-  done: boolean;
-  safety?: boolean;
-}
+// Client-safe pieces live in ./api-types (zod-free); re-exported here so
+// server-side imports keep a single entry point.
+export { FALLBACK_LABELS } from "./api-types";
+export type { CheckinStateFrame } from "./api-types";

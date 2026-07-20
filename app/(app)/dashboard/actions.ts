@@ -26,17 +26,27 @@ export async function createHabit(formData: FormData) {
 }
 
 export async function archiveHabit(habitId: string) {
-  const { supabase } = await requireUser();
+  const { supabase, user } = await requireUser();
   await supabase
     .from("habits")
     .update({ archived_at: new Date().toISOString() })
-    .eq("id", habitId);
+    .eq("id", habitId)
+    .eq("user_id", user.id);
   revalidatePath("/dashboard");
 }
 
 /** Toggle today's check for a habit: add it if missing, remove it if present. */
 export async function toggleHabitToday(habitId: string) {
-  const { supabase } = await requireUser();
+  const { supabase, user } = await requireUser();
+  // habit_checks carries no user_id (ownership flows through habits), so
+  // verify the habit is the caller's before touching its checks.
+  const owned = await supabase
+    .from("habits")
+    .select("id")
+    .eq("id", habitId)
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (!owned.data) return;
   const today = new Date().toISOString().slice(0, 10);
   const existing = await supabase
     .from("habit_checks")
@@ -100,7 +110,11 @@ export async function createGoal(formData: FormData) {
 
 export async function setGoalStatus(goalId: string, status: string) {
   if (!(GOAL_STATUSES as readonly string[]).includes(status)) return;
-  const { supabase } = await requireUser();
-  await supabase.from("goals").update({ status }).eq("id", goalId);
+  const { supabase, user } = await requireUser();
+  await supabase
+    .from("goals")
+    .update({ status })
+    .eq("id", goalId)
+    .eq("user_id", user.id);
   revalidatePath("/dashboard");
 }

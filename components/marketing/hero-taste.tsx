@@ -2,16 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { paths, quoteBanks } from "@/content";
-import { routerOptions, routerPrompt } from "@/content/router";
-import { routeEntry } from "@/lib/guidepost/router";
 import {
   advance,
   startSession,
   type EngineContext,
 } from "@/lib/guidepost/machine";
 import type { SessionState } from "@/lib/guidepost/types";
-import type { Flags } from "@/lib/flags";
+import type { HeroTasteContent } from "@/content/marketing/hero-slice";
 
 /**
  * Interactive reflective hero (PRD §5): "the visitor immediately sees their
@@ -20,17 +17,13 @@ import type { Flags } from "@/lib/flags";
  * DB writes, NO LLM. Option taps only; if the flow reaches a free-text node,
  * we invite sign-up rather than process text. Verbatim authored lines only
  * (the exact hero script is gap G-L1 — pending Cat).
+ *
+ * Content arrives as props: a server-built slice of just the nodes these
+ * beats can reach (content/marketing/hero-slice.ts), so the public bundle
+ * carries no path files and the flag-gated paths never ship. Keep MAX_BEATS
+ * in sync with HERO_BEATS there.
  */
 
-// Only Green/Yellow are offered here; the flag-gated paths never appear.
-const HERO_FLAGS: Flags = {
-  bluePath: false,
-  redPath: false,
-  dashboardExtras: false,
-  quizScoring: false,
-  safetyClassifier: false,
-};
-const HERO_OPTIONS = routerOptions.filter((o) => !o.flag);
 const MAX_BEATS = 2;
 
 interface Line {
@@ -38,12 +31,12 @@ interface Line {
   text: string;
 }
 
-export function HeroTaste() {
+export function HeroTaste({ content }: { content: HeroTasteContent }) {
   const [lines, setLines] = useState<Line[]>([
-    { role: "juniper", text: routerPrompt.text },
+    { role: "juniper", text: content.prompt },
   ]);
   const [options, setOptions] = useState<{ id: string; label: string }[]>(
-    HERO_OPTIONS.map((o) => ({ id: o.id, label: o.label })),
+    content.options.map((o) => ({ id: o.id, label: o.label })),
   );
   const [state, setState] = useState<SessionState | null>(null);
   const [beats, setBeats] = useState(0);
@@ -52,20 +45,26 @@ export function HeroTaste() {
   function pick(id: string, label: string) {
     const you: Line = { role: "you", text: label };
 
-    // First pick: the router routes to a path and starts the taste.
+    // First pick: route to the chosen path and start the taste.
     if (!state) {
-      const path = routeEntry(id, HERO_FLAGS);
-      const content = path ? paths[path] : undefined;
-      if (!content) return;
-      const ctx: EngineContext = { content, quoteBanks };
+      const path = content.options.find((o) => o.id === id)?.path;
+      const pathContent = path ? content.paths[path] : undefined;
+      if (!pathContent) return;
+      const ctx: EngineContext = {
+        content: pathContent,
+        quoteBanks: content.quoteBanks,
+      };
       applyOutput(you, startSession(ctx, "standard"));
       return;
     }
 
     // Subsequent pick: advance the machine one beat.
-    const content = paths[state.path];
-    if (!content) return;
-    const ctx: EngineContext = { content, quoteBanks };
+    const pathContent = content.paths[state.path];
+    if (!pathContent) return;
+    const ctx: EngineContext = {
+      content: pathContent,
+      quoteBanks: content.quoteBanks,
+    };
     applyOutput(you, advance(state, { type: "option", optionId: id }, ctx));
   }
 

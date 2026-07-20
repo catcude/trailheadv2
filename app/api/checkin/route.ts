@@ -41,6 +41,7 @@ const PAYWALL_COPY =
   "You’ve used today’s check-in. Come back tomorrow whenever you’re ready — or unlock unlimited check-ins any time. Mini Resets are always free.";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
+import { isTrustedOrigin } from "@/lib/utils/origin-check";
 import { createFixedWindowLimiter } from "@/lib/utils/rate-limit";
 import { checkinVariantForHour } from "@/lib/utils/time";
 
@@ -68,6 +69,9 @@ export async function POST(request: NextRequest) {
       { error: "Check-ins aren’t available in this environment yet." },
       { status: 503 },
     );
+  }
+  if (!isTrustedOrigin(request)) {
+    return NextResponse.json({ error: "invalid request" }, { status: 403 });
   }
 
   // 1. Auth
@@ -162,10 +166,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "invalid request" }, { status: 400 });
     }
     sessionId = body.sessionId;
+    // Ownership: RLS scopes the read; the explicit user filter is the
+    // second layer (defense in depth, 2026-07-20 audit).
     const loaded = await supabase
       .from("chat_sessions")
       .select("id, path, state, path_history")
       .eq("id", sessionId)
+      .eq("user_id", user.id)
       .single();
     if (loaded.error || !loaded.data) {
       return NextResponse.json({ error: "session not found" }, { status: 404 });
@@ -415,20 +422,24 @@ async function persistTurn(
       stage: output.stage,
     });
   }
-  if (rows.length > 0) {
-    const { error } = await supabase.from("chat_messages").insert(rows);
-    if (error) throw error;
-  }
-  const { error } = await supabase
-    .from("chat_sessions")
-    .update({
-      current_node: output.state.currentNodeId,
-      state: output.state,
-      ended_at: output.done ? new Date().toISOString() : null,
-      ...extraSession,
-    })
-    .eq("id", sessionId);
-  if (error) throw error;
+  // The message insert and session update are independent — run them
+  // together instead of serializing two round-trips.
+  const [insertRes, updateRes] = await Promise.all([
+    rows.length > 0
+      ? supabase.from("chat_messages").insert(rows)
+      : Promise.resolve({ error: null }),
+    supabase
+      .from("chat_sessions")
+      .update({
+        current_node: output.state.currentNodeId,
+        state: output.state,
+        ended_at: output.done ? new Date().toISOString() : null,
+        ...extraSession,
+      })
+      .eq("id", sessionId),
+  ]);
+  if (insertRes.error) throw insertRes.error;
+  if (updateRes.error) throw updateRes.error;
 }
 
 function sseHeaders() {
@@ -444,6 +455,18 @@ function sse(output: EngineOutput, sessionId: string): Response {
   // Stage-5 recalibration (PRD §3.3) overrides the node's own tone for the
   // rest of the session; falls back to the node tone before any Stage-5 pick.
   const tone = recalibratedTone(output.state.choices) ?? output.toneTag;
+  // `adaptMessage` rephrases only `adaptable` lines under a real provider
+  // and falls back to authored text on any LLM error. Safety, reflection
+  // quotes, and acknowledgments marked `adaptable: false` are byte-identical
+  // (PRD §6.2). All adaptations are dispatched together — they're independent
+  // of each other — then streamed in authored order; a caught rejection is
+  // stored and rethrown at its turn so a bug still surfaces exactly as it
+  // did when the calls were sequential.
+  const adapted = output.messages.map((message) =>
+    adaptMessage(provider, message, tone).catch((error: unknown) => ({
+      __adaptError: error,
+    })),
+  );
   const encoder = new TextEncoder();
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
@@ -451,15 +474,13 @@ function sse(output: EngineOutput, sessionId: string): Response {
         controller.enqueue(
           encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`),
         );
-      for (const message of output.messages) {
-        send("message", { nodeId: message.nodeId });
-        // `adaptMessage` rephrases only `adaptable` lines under a real
-        // provider and falls back to authored text on any LLM error. Safety,
-        // reflection quotes, and acknowledgments marked `adaptable: false`
-        // are byte-identical (PRD §6.2). The resolved line is then chunked by
-        // the verbatim streamer so the SSE `token` framing is uniform.
-        const text = await adaptMessage(provider, message, tone);
-        for await (const chunk of streamAuthored(text)) {
+      for (let i = 0; i < output.messages.length; i++) {
+        send("message", { nodeId: output.messages[i].nodeId });
+        const result = await adapted[i];
+        if (typeof result !== "string") throw result.__adaptError;
+        // The resolved line is chunked by the verbatim streamer so the SSE
+        // `token` framing is uniform.
+        for await (const chunk of streamAuthored(result)) {
           send("token", { text: chunk });
         }
       }

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Mountains } from "@/components/marketing/mountains";
 import { HeroTaste } from "@/components/marketing/hero-taste";
+import { buildHeroTasteContent } from "@/content/marketing/hero-slice";
 
 /*
  * Landing v0 (static). The interactive reflective hero — a live taste of the
@@ -38,7 +39,7 @@ export default function LandingPage() {
               </span>
             </div>
           </div>
-          <HeroTaste />
+          <HeroTaste content={buildHeroTasteContent()} />
         </div>
         <Mountains className="absolute bottom-0 left-0 h-40 w-full" />
       </section>
